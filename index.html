@@ -3,213 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIS INFINITY | Neural Genesis Overlord v10.0</title>
+    <title>OMNIS INFINITY | Global Bio-Database v13.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #05070a;
-            --panel: #0d1117;
+            --bg-deep: #010204;
+            --panel-bg: #0a0d12;
             --neon-blue: #00d2ff;
             --neon-green: #39ff14;
             --neon-purple: #bc8cff;
             --neon-gold: #ffcc00;
             --danger: #ff3131;
-            --text: #e1e4e8;
             --border: 1px solid rgba(0, 210, 255, 0.2);
         }
 
         * { box-sizing: border-box; cursor: crosshair; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+        body { margin: 0; background: var(--bg-deep); color: #e1e4e8; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
 
-        /* --- TICKER NASDAQ --- */
-        .market-ticker {
-            background: #000; color: var(--neon-gold); padding: 6px; font-family: 'Fira Code'; font-size: 10px;
-            border-bottom: 1px solid var(--neon-gold); white-space: nowrap; overflow: hidden; letter-spacing: 1px;
-        }
+        .market-ticker { background: #000; color: var(--neon-gold); padding: 8px; font-family: 'Fira Code'; font-size: 11px; border-bottom: 1px solid var(--neon-gold); overflow: hidden; white-space: nowrap; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: rgba(0,0,0,0.95); border-bottom: 2px solid var(--neon-blue); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-family: 'Orbitron'; font-size: 24px; color: #fff; letter-spacing: 5px; font-weight: 900; }
 
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 30px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--neon-blue);
-            position: sticky; top: 0; z-index: 1000;
-        }
-        .logo { font-family: 'Orbitron'; font-size: 22px; color: var(--neon-blue); letter-spacing: 4px; font-weight: 900; }
+        .master-layout { display: grid; grid-template-columns: 380px 1fr 380px; gap: 15px; padding: 15px; height: calc(100vh - 100px); }
 
-        /* --- LAYOUT MAESTRO --- */
-        .master-layout {
-            display: grid; grid-template-columns: 360px 1fr 360px;
-            gap: 15px; padding: 15px; height: calc(100vh - 90px);
-        }
+        .panel { background: var(--panel-bg); border: var(--border); border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; }
+        .panel-h { background: rgba(255,255,255,0.02); padding: 12px; font-family: 'Orbitron'; font-size: 11px; color: var(--neon-blue); border-bottom: var(--border); letter-spacing: 2px; }
 
-        .panel { background: var(--panel); border: var(--border); border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .panel-h { background: rgba(255,255,255,0.03); padding: 10px; font-family: 'Orbitron'; font-size: 11px; color: var(--neon-blue); border-bottom: var(--border); letter-spacing: 1px; }
+        /* --- BUSCADOR UNIVERSAL --- */
+        .search-container { padding: 15px; background: rgba(0,0,0,0.4); border-bottom: var(--border); }
+        .search-input { width: 100%; background: #000; border: 1px solid var(--neon-blue); color: var(--neon-green); padding: 10px; font-family: 'Fira Code'; outline: none; }
+        .search-results { font-size: 10px; color: #666; margin-top: 5px; }
+
+        /* --- PACIENTE & TIMELINE --- */
+        .patient-card { padding: 15px; background: #000; margin: 10px; border-radius: 4px; border-left: 3px solid var(--neon-green); }
+        .timeline-bar { height: 4px; background: #222; position: relative; margin: 20px 0; }
+        .timeline-point { width: 10px; height: 10px; background: var(--neon-blue); border-radius: 50%; position: absolute; top: -3px; }
 
         /* --- VISOR 3D --- */
-        .viewport { flex-grow: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
-        #v-3d { width: 100%; height: 100%; z-index: 2; }
-        #v-live { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0.4; display: none; filter: hue-rotate(140deg); }
+        .viewport { flex-grow: 1; position: relative; background: radial-gradient(circle, #0d1117 0%, #000 100%); }
+        #v-3d { width: 100%; height: 100%; }
 
         /* --- EDITOR CRISPR --- */
-        .crispr-bench { background: #000; padding: 15px; border-top: var(--border); }
-        .sequence-editor {
-            font-family: 'Fira Code', monospace; font-size: 14px; letter-spacing: 4px;
-            background: #05070a; border: 1px solid #333; padding: 12px; color: var(--neon-green);
-            word-break: break-all; min-height: 70px; outline: none; border-radius: 4px;
-        }
-        .base-a { color: #ff5f5f; } .base-t { color: #5fafff; } .base-c { color: #ffdf5f; } .base-g { color: #5fff7f; }
+        .sequence-editor { font-family: 'Fira Code', monospace; font-size: 15px; letter-spacing: 5px; background: #000; border: 1px solid #222; padding: 15px; color: var(--neon-green); word-break: break-all; min-height: 80px; outline: none; }
 
-        /* --- BOTONES --- */
-        .btn { width: 100%; padding: 14px; background: var(--neon-blue); color: #000; font-family: 'Orbitron'; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; font-size: 12px; }
-        .btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-blue); transform: translateY(-2px); }
-        .btn-ghost { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); }
+        .btn { width: 100%; padding: 15px; background: var(--neon-blue); color: #000; font-family: 'Orbitron'; font-weight: 900; border: none; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { background: #fff; box-shadow: 0 0 30px var(--neon-blue); }
 
-        /* --- MÉTRICAS --- */
-        .metric { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #1a1d23; font-size: 14px; }
-        .val { font-family: 'Fira Code'; color: var(--neon-green); font-weight: bold; }
+        .extra-sections { padding: 50px; background: #000; border-top: 3px solid var(--neon-purple); }
+        .ia-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .ia-card { background: var(--panel-bg); border: 1px solid #1a1d23; padding: 25px; border-radius: 5px; }
 
-        /* --- IA CARDS --- */
-        .extra-data { padding: 60px; background: #05070a; border-top: 3px solid var(--neon-purple); }
-        .ia-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; }
-        .ia-card { background: var(--panel); border: 1px solid var(--neon-purple); padding: 30px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .ia-card h3 { font-family: 'Orbitron'; font-size: 13px; color: var(--neon-purple); margin-top: 0; border-bottom: 1px solid #222; padding-bottom: 10px; }
-        
-        .input-ia { width: 100%; background: #000; border: 1px solid #333; color: var(--neon-green); padding: 12px; font-family: 'Fira Code'; margin-top: 15px; border-radius: 4px; }
-
-        /* --- REPORTE INDUSTRIAL --- */
-        .btn-report {
-            background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
-            color: #fff; font-family: 'Orbitron'; font-weight: 900; padding: 30px;
-            border: none; width: 100%; margin-top: 60px; cursor: pointer; border-radius: 4px;
-            font-size: 20px; letter-spacing: 2px; transition: 0.4s;
-        }
-        .btn-report:hover { filter: brightness(1.2); box-shadow: 0 0 50px rgba(188, 140, 255, 0.4); }
-
+        .btn-report { background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); color: white; padding: 30px; border: none; font-family: 'Orbitron'; font-weight: 900; width: 100%; cursor: pointer; font-size: 20px; margin-top: 50px; }
     </style>
 </head>
 <body>
 
-<div class="market-ticker" id="ticker">
-    NASDAQ: $OMNIS +15.4% ↑ | BIOTECH INDEX: +2.1% | PATENT VALUATION: $6.2B | AI CORE: ONLINE | GENBANK SYNC: ACTIVE
+<div class="market-ticker">
+    NASDAQ: $OMNIS +42.1% ↑ | GLOBAL HEALTH INDEX: SECURED | DATABASE: 4.2 MILLION PATHOGENS | AI CORE: ONLINE
 </div>
 
 <header>
-    <div class="logo">OMNIS INFINITY <span style="font-size:10px; color:var(--neon-gold);">ENTERPRISE v10.0</span></div>
-    <div id="status-tag" style="font-size:12px; color:var(--neon-green); font-family:'Fira Code';">
-        ● PACIENTE #PX-2026: MONITOREO CRÍTICO | BIO-INTELIGENCIA ACTIVA
-    </div>
+    <div class="logo">OMNIS INFINITY <span style="font-size:10px; color:var(--neon-gold);">GLOBAL v13.0</span></div>
+    <div id="ai-status" style="font-family:'Fira Code'; color:var(--neon-green); font-size:12px;">● MODO OSCURO TOTAL | SISTEMA PX-2026 CONECTADO AL GENBANK UNIVERSAL</div>
 </header>
 
 <main class="master-layout">
     <aside class="panel">
-        <div class="panel-h">BIO-ENGINEERING CORE</div>
-        <div style="padding:20px;">
-            <label style="font-size:10px; color:#666;">PATÓGENO SELECCIONADO (GENBANK ID)</label>
-            <select id="pato-select" style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:12px; margin-bottom:20px; font-family:'Fira Code';">
-                <option value="sars">NC_045512.2 (SARS-CoV-2)</option>
-                <option value="glio">U82226.1 (GLIOBLASTOMA)</option>
-                <option value="silica">SILICA-X (CRISTAL VIRUS)</option>
-            </select>
+        <div class="panel-h">BUSCADOR UNIVERSAL DE ENFERMEDADES</div>
+        <div class="search-container">
+            <input type="text" class="search-input" id="pathogen-search" placeholder="Buscar: Ébola, Influenza, Cáncer, X-Virus..." oninput="filterPathogens()">
+            <div class="search-results" id="search-status">Buscando en bibliotecas globales...</div>
+        </div>
 
-            <label style="font-size:10px; color:#666;">TEMPERATURA DE REACCIÓN</label>
-            <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
-                <input type="range" min="0" max="150" value="37" style="flex-grow:1;" id="temp-slider">
-                <span id="temp-display" style="font-family:'Fira Code'; color:var(--neon-purple); font-size:18px;">37.0°C</span>
+        <div class="panel-h">PACIENTE PX-2026 (MONITOREO)</div>
+        <div class="patient-card">
+            <div style="font-size:11px; margin-bottom:10px;">
+                <b>ESTADO:</b> <span id="p-status" style="color:var(--danger)">FASE CRÍTICA</span><br>
+                <b>BIO-SIGN:</b> <span id="hr">72</span> BPM | <b>DNA:</b> ESTABLE
             </div>
-
-            <label style="font-size:10px; color:#666;">MÉTODO DE SÍNTESIS</label>
-            <select style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:12px; margin-bottom:20px;">
-                <option>Nanopartículas Lipídicas (LNP)</option>
-                <option>Vector Viral Adenoasociado (AAV)</option>
-                <option>Impresión de Proteínas 3D</option>
-            </select>
-
-            <button class="btn" id="btn-genesis">EJECUTAR SÍNTESIS DE CURA</button>
-            <button class="btn btn-ghost" id="btn-ncbi">CONECTAR CLOUD NCBI</button>
-
-            <div id="log-console" style="margin-top:20px; font-family:'Fira Code'; font-size:10px; color:var(--neon-blue); height:80px; overflow-y:auto; background:rgba(0,0,0,0.3); padding:10px;">
-                > Sistema listo para decodificación...
+            <div class="timeline-bar">
+                <div class="timeline-point" style="left: 0%;"></div>
+                <div class="timeline-point" style="left: 50%;"></div>
+                <div class="timeline-point" style="left: 85%; background:var(--danger);"></div>
+                <div class="timeline-point" style="left: 100%; border:1px solid var(--neon-green); background:none;"></div>
             </div>
+        </div>
+
+        <div class="panel-h">SÍNTESIS QUÍMICA</div>
+        <div style="padding:15px;">
+            <label style="font-size:10px;">SELECCIONAR PATÓGENO ACTIVO:</label>
+            <select id="pato-select" style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:10px; margin-bottom:15px;" onchange="updateModel()">
+                <option value="default">-- Seleccione del Buscador --</option>
+                <option value="virus">VIRUS (ESTRUCTURA ICOSAÉDRICA)</option>
+                <option value="bacteria">BACTERIA (ESTRUCTURA BACILO)</option>
+                <option value="cancer">CÁNCER (CELULAR ANÓMALO)</option>
+                <option value="x">PATÓGENO X (DESCONOCIDO)</option>
+            </select>
+            <button class="btn" onclick="startInference()">INICIAR INFERENCIA IA</button>
+            <div id="log" style="font-family:'Fira Code'; font-size:9px; color:var(--neon-blue); height:50px; overflow-y:auto; margin-top:10px; background:rgba(0,0,0,0.5); padding:5px;">> En espera...</div>
         </div>
     </aside>
 
     <section class="panel">
-        <div class="panel-h" style="display:flex; justify-content:space-between; align-items:center;">
-            <span>ESTRUCTURA ATÓMICA DEL AGENTE</span>
-            <div>
-                <button class="btn-ghost" style="font-size:9px; padding:2px 8px;" onclick="toggleView('3d')">3D</button>
-                <button class="btn-ghost" style="font-size:9px; padding:2px 8px;" onclick="toggleView('video')">LIVE</button>
-            </div>
-        </div>
-        <div class="viewport">
-            <video id="v-live" loop muted autoplay>
-                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-            </video>
-            <div id="v-3d"></div>
-        </div>
-        <div class="crispr-bench">
-            <div style="font-family:'Orbitron'; font-size:10px; color:var(--neon-purple); margin-bottom:10px;">🛠️ EDITOR CRISPR-CAS9 (SECUENCIA ACTIVA)</div>
-            <div class="sequence-editor" contenteditable="true" id="dna-editor">
-                <span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span>
-            </div>
-        </div>
+        <div class="panel-h">BIO-VISUALIZADOR 3D DE ENFERMEDAD</div>
+        <div class="viewport"><div id="v-3d"></div></div>
+        <div class="panel-h">EDITOR DE SECUENCIA CRISPR</div>
+        <div class="sequence-editor" contenteditable="true" id="dna-editor">ATGC--GENOMA--ACTIVO--DETECTOR--ON</div>
     </section>
 
     <aside class="panel">
-        <div class="panel-h">DASHBOARD DE IA & PACIENTE</div>
+        <div class="panel-h">INTELIGENCIA SUPREMA (ANÁLISIS)</div>
         <div style="padding:15px;">
-            <div class="metric"><span>Afinidad de Ligando</span><span class="val" id="m1">--</span></div>
-            <div class="metric"><span>Citotoxicidad (LD50)</span><span class="val" id="m2" style="color:var(--danger)">--</span></div>
-            <div class="metric"><span>Estabilidad Térmica</span><span class="val" id="m3">--</span></div>
-            <div class="metric"><span>Probabilidad de Éxito</span><span class="val" id="m4" style="font-size:18px; color:var(--neon-blue)">--</span></div>
-
-            <div style="background:rgba(188, 140, 255, 0.1); padding:20px; margin-top:25px; border-radius:4px; border:1px solid var(--neon-purple);">
-                <div style="font-family:'Orbitron'; font-size:10px; color:var(--neon-purple); margin-bottom:10px;">CONSEJO IA SUPREMA</div>
-                <div id="ai-advice" style="font-size:13px; line-height:1.5;">Esperando datos de secuencia para realizar predicción clínica...</div>
+            <div style="background:rgba(188, 140, 255, 0.05); border:1px solid var(--neon-purple); padding:15px; border-radius:4px;">
+                <div id="ai-thought" style="font-size:12px;">"Analizando billones de combinaciones moleculares para hallar la cura..."</div>
             </div>
-
-            <div style="margin-top:25px; font-size:11px; color:#555; text-align:center;">
-                MODO OSCURO ACTIVO | ENCRIPTACIÓN CUÁNTICA AES-256
+            <div style="margin-top:20px;">
+                <div style="font-size:10px; color:#555;">PROBABILIDAD DE CURA</div>
+                <div id="m-exito" style="font-size:30px; font-family:'Orbitron'; color:var(--neon-green);">0%</div>
+            </div>
+            <div style="margin-top:20px; padding:15px; border:1px solid var(--neon-gold);">
+                <div style="font-size:10px; color:var(--neon-gold);">VALOR DE MERCADO DE LA PATENTE</div>
+                <div id="ip-val" style="font-size:24px; font-weight:900;">$0.00</div>
             </div>
         </div>
     </aside>
 </main>
 
-<section class="extra-data">
+<section class="extra-sections">
     <div class="ia-grid">
         <div class="ia-card">
-            <h3>🛡️ DEBILIDAD ESTRUCTURAL (Nature Data)</h3>
-            <div id="bio-fail" style="font-size:13px; color:#aaa; line-height:1.6;">Seleccione un patógeno para contrastar con papers de la base de datos PubMed...</div>
-            <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
-                <span style="font-size:10px; color:var(--neon-blue);">PROTOCOLO SUGERIDO:</span>
-                <div id="ai-protocol" style="font-weight:bold; color:var(--neon-green); margin-top:5px;">SINCRONIZACIÓN REQUERIDA</div>
-            </div>
+            <h3>🛡️ DEBILIDADES DEL PATÓGENO</h3>
+            <p id="deb-text" style="font-size:13px; color:#aaa;">Ingrese patógeno para ver debilidades clínicas...</p>
         </div>
-
-        <div class="ia-card" style="border-color:var(--neon-blue);">
-            <h3>🧪 VALIDACIÓN DE CURA PROPIA</h3>
-            <label style="font-size:10px;">NOMBRE DEL COMPUESTO:</label>
-            <input type="text" id="user-substance" class="input-ia" placeholder="Ej: Inhibidor-X1...">
-            <button class="btn" id="btn-analyze" style="margin-top:15px;">CORRER SIMULACIÓN MONTECARLO</button>
-            <div id="user-result" style="margin-top:20px; font-size:13px;"></div>
+        <div class="ia-card" style="border-color:var(--neon-blue)">
+            <h3>🧪 SUSTANCIAS Y ELEMENTOS</h3>
+            <input type="text" id="cura-name" class="input-ia" placeholder="Nombre de tu sustancia...">
+            <button class="btn" style="height:40px; font-size:11px;" onclick="analizarCura()">TESTEAR SUSTANCIA</button>
+            <div id="res-cura" style="margin-top:10px;"></div>
         </div>
-
-        <div class="ia-card" style="border-color:var(--neon-gold);">
-            <h3>💰 IMPACTO FINANCIERO & IP</h3>
-            <div style="font-size:10px; color:var(--neon-gold);">VALUACIÓN ESTIMADA DE PATENTE</div>
-            <div id="ip-val" style="font-size:32px; font-weight:900; margin:10px 0;">$0.00</div>
-            <div style="height:6px; background:#1a1d23; border-radius:10px; overflow:hidden;">
-                <div id="bar-fill" style="width:0%; height:100%; background:var(--neon-gold); transition:1s;"></div>
-            </div>
-            <div style="font-size:10px; margin-top:10px;">PENETRACIÓN DE MERCADO GLOBAL</div>
+        <div class="ia-card" style="border-color:var(--neon-gold)">
+            <h3>💰 LOGÍSTICA MUNDIAL</h3>
+            <div id="roi-text" style="font-size:12px;">Esperando datos de éxito...</div>
         </div>
     </div>
-
-    <button class="btn-report" id="btn-final-report">📄 GENERAR REPORTE INDUSTRIAL DE ALTO NIVEL (BOARD DIRECTORS)</button>
+    <button class="btn-report" onclick="generarReporteIndustrial()">📄 GENERAR INFORME INDUSTRIAL DE 6 BILLONES USD</button>
 </section>
 
 <script>
-    // --- MOTOR 3D PROFESIONAL ---
-    let scene, camera, renderer, crystal;
+    let scene, camera, renderer, virus;
     function init3D() {
         scene = new THREE.Scene();
         const container = document.getElementById('v-3d');
@@ -217,93 +160,57 @@
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(renderer.domElement);
-
-        const geo = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+        const geo = new THREE.IcosahedronGeometry(12, 1);
         const mat = new THREE.MeshPhongMaterial({ color: 0x00d2ff, wireframe: true, emissive: 0x00d2ff, emissiveIntensity: 0.5 });
-        crystal = new THREE.Mesh(geo, mat);
-        scene.add(crystal);
-
+        virus = new THREE.Mesh(geo, mat);
+        scene.add(virus);
         const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(10, 10, 10);
+        light.position.set(20, 20, 20);
         scene.add(light);
         camera.position.z = 30;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            crystal.rotation.y += 0.005;
-            renderer.render(scene, camera);
-        }
+        function animate() { requestAnimationFrame(animate); virus.rotation.y += 0.005; renderer.render(scene, camera); }
         animate();
     }
     init3D();
 
-    function toggleView(type) {
-        document.getElementById('v-live').style.display = (type === 'video') ? 'block' : 'none';
-        document.getElementById('v-3d').style.display = (type === '3d') ? 'block' : 'none';
+    function filterPathogens() {
+        const val = document.getElementById('pathogen-search').value;
+        document.getElementById('search-status').innerText = val ? `Accediendo a datos de: ${val}...` : "Buscando en bibliotecas globales...";
     }
 
-    // --- LÓGICA DE BOTONES ---
-    document.getElementById('temp-slider').addEventListener('input', function(e) {
-        const val = e.target.value;
-        document.getElementById('temp-display').innerText = val + ".0°C";
-        crystal.material.color.setHex(val > 70 ? 0xff3131 : 0x00d2ff);
-    });
-
-    document.getElementById('btn-genesis').onclick = function() {
-        const log = document.getElementById('log-console');
-        const pato = document.getElementById('pato-select').value;
-        log.innerHTML += "<br>> Consultando GenBank API...<br>> Calculando afinidad molecular...";
-        
+    function startInference() {
+        const log = document.getElementById('log');
+        log.innerHTML += "<br>> Accediendo a base de datos de enfermedades mundial...<br>> Cruzando con GenBank...";
         setTimeout(() => {
-            document.getElementById('m1').innerText = "-24.8 kcal/mol";
-            document.getElementById('m2').innerText = "0.002%";
-            document.getElementById('m3').innerText = "98.9%";
-            document.getElementById('m4').innerText = "94.2%";
-            document.getElementById('ai-advice').innerText = "La secuencia es estable. Se recomienda proceder a la fase de síntesis lipídica inmediata.";
-            
-            if(pato === 'silica') {
-                document.getElementById('bio-fail').innerText = "El patógeno Silica-X presenta una vulnerabilidad crítica en sus enlaces de silicio ante frecuencias sónicas.";
-                document.getElementById('ai-protocol').innerText = "DISRUPCIÓN SÓNICA + QUELANTE";
-            }
+            document.getElementById('m-exito').innerText = "98.7%";
+            document.getElementById('ai-thought').innerText = "Cura teórica encontrada. Estructura molecular compatible con el receptor objetivo.";
+            document.getElementById('deb-text').innerText = "Vulnerabilidad detectada en la cápside externa. Sensible a agentes de síntesis OMNIS.";
         }, 1500);
-    };
+    }
 
-    document.getElementById('btn-analyze').onclick = function() {
-        const sub = document.getElementById('user-substance').value;
-        const res = document.getElementById('user-result');
-        if(!sub) return alert("Ingrese el nombre del compuesto");
-        
-        res.innerHTML = "<span style='color:var(--neon-blue)'>Corriendo 10,000 simulaciones...</span>";
-        setTimeout(() => {
-            const success = sub.length > 6 ? 89 : 24;
-            res.innerHTML = `<b style="color:var(--neon-green); font-size:18px;">ÉXITO: ${success}%</b><br><span style="font-size:11px; color:#666;">Basado en validación de papers Lancet/Nature.</span>`;
-            document.getElementById('ip-val').innerText = `$${(success * 62.5).toFixed(2)}M`;
-            document.getElementById('bar-fill').style.width = success + "%";
-        }, 1500);
-    };
+    function analizarCura() {
+        const n = document.getElementById('cura-name').value;
+        const exito = n.length > 5 ? 99 : 30;
+        document.getElementById('res-cura').innerHTML = `<b style="color:var(--neon-green)">EFICACIA: ${exito}%</b>`;
+        document.getElementById('ip-val').innerText = `$${(exito * 68.5).toFixed(2)}M`;
+        document.getElementById('roi-text').innerText = `ROI ESTIMADO: ${exito * 15}% | VIABILIDAD: ALTA`;
+    }
 
-    document.getElementById('btn-final-report').onclick = function() {
+    function generarReporteIndustrial() {
         const win = window.open("", "_blank");
-        const sub = document.getElementById('user-substance').value || "OMNIS-GENESIS-01";
         win.document.write(`
-            <body style="background:#fff; color:#000; font-family:serif; padding:60px; line-height:1.5;">
-                <div style="border-bottom: 2px solid #000; padding-bottom:10px;">
-                    <h1 style="margin:0;">OMNIS INFINITY - INDUSTRIAL TECHNICAL DOSSIER</h1>
-                    <p>CLASSIFICATION: TOP SECRET / LEVEL 5 ACCESS ONLY</p>
-                </div>
-                <h2>1. SUMMARY OF BIOPROCESSING</h2>
-                <p>Synthesis of compound <b>${sub}</b> has been validated via Neural Genesis Core. Final docking affinity measured at -24.8 kcal/mol, indicating absolute binding efficiency.</p>
-                <h2>2. INTELLECTUAL PROPERTY & MARKET</h2>
-                <p>Current estimated valuation of the asset: <b>${document.getElementById('ip-val').innerText} USD</b>. The patent covers the mechanism of action against GenBank ID ${document.getElementById('pato-select').value}.</p>
-                <div style="border:1px solid #000; padding:20px; background:#f9f9f9;">
-                    <b>VERDICT:</b> READY FOR PHASE 1 CLINICAL TRIALS.
-                </div>
-                <p style="margin-top:100px;">Signed,<br>Cerebro Supremo IA - OMNIS INFINITY</p>
+            <body style="background:#fff; font-family:serif; padding:50px; color:#000;">
+                <h1 style="border-bottom:3px solid #000;">OMNIS INFINITY - INFORME GLOBAL DE VALUACIÓN</h1>
+                <p>PATÓGENO: ${document.getElementById('pathogen-search').value || "Búsqueda Universal"}</p>
+                <p>VALOR DE LA PATENTE: ${document.getElementById('ip-val').innerText} USD</p>
+                <p>ESTADO DEL PACIENTE: RECUPERACIÓN PROYECTADA</p>
+                <hr>
+                <p>Este informe certifica que la tecnología de OMNIS INFINITY posee el monopolio de la cura contra la enfermedad seleccionada.</p>
             </body>
         `);
     }
 
+    setInterval(() => { document.getElementById('hr').innerText = Math.floor(Math.random() * (78 - 70) + 70); }, 2000);
 </script>
-
 </body>
-                </html>
+</html>
