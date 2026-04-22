@@ -3,117 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v10.0 | Quantum Bio-Simulator</title>
+    <title>BioOS v10.1 | Restoration</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        body { font-family: 'JetBrains Mono', monospace; background: #010409; color: #94a3b8; overflow-x: hidden; }
+        body { font-family: 'JetBrains Mono', monospace; background: #010409; color: #94a3b8; }
         .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        #viewer3d { width: 100%; height: 450px; border-radius: 2rem; background: radial-gradient(circle, #0f172a 0%, #000 100%); }
-        .sim-active { border-color: #22c55e !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
+        #viewer3d { width: 100%; height: 500px; border-radius: 2rem; background: #000; }
         .hidden { display: none; }
-        .scroll-custom::-webkit-scrollbar { width: 4px; }
-        .scroll-custom::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .stat-card { background: rgba(30, 41, 59, 0.5); border-left: 4px solid #4f46e5; }
     </style>
 </head>
-<body class="p-4 lg:p-6">
+<body class="p-4 lg:p-10">
 
     <div class="fixed top-6 right-6 z-50 flex gap-2">
-        <button onclick="toggleSimPanel()" class="p-3 rounded-xl bg-green-600/20 hover:bg-green-600/40 border border-green-500/30 transition-all">
+        <button onclick="toggleSimPanel()" class="p-3 rounded-xl bg-green-600/20 hover:bg-green-600/40 border border-green-500/30">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <button onclick="toggleMenu()" class="p-3 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 transition-all text-white font-bold text-xl">⋮</button>
+        <button onclick="alert('Modo Sentinel Activo')" class="p-3 rounded-xl bg-indigo-600/20 text-white font-bold text-xl">⋮</button>
     </div>
 
-    <div id="simPanel" class="hidden fixed inset-0 z-40 bg-black/90 backdrop-blur-md p-6 overflow-y-auto">
+    <div id="simPanel" class="hidden fixed inset-0 z-40 bg-black/95 p-10 overflow-y-auto">
         <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-black text-green-400 italic">CRONOS SIMULATOR v1.0</h2>
-                <button onclick="toggleSimPanel()" class="text-white hover:text-red-400">CERRAR [X]</button>
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-black text-green-400 italic">CRONOS SIMULATOR</h2>
+                <button onclick="toggleSimPanel()" class="text-white hover:text-red-500 font-bold">CERRAR [X]</button>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div class="glass-panel p-6 rounded-3xl">
-                    <label class="text-[10px] font-bold text-green-400 uppercase tracking-widest block mb-4">Configurar Sustancia para Lapso Temporal</label>
-                    <input id="simInput" type="text" class="w-full bg-black/50 p-4 rounded-xl text-white outline-none border border-green-500/20 mb-4" placeholder="Ej: Ibuprofeno o Sustancia X">
-                    <button onclick="startTemporalSim()" class="w-full bg-green-600 text-black font-black py-4 rounded-xl hover:bg-green-400 transition-all uppercase text-xs">Iniciar Simulación 24h</button>
+                    <input id="simInput" type="text" class="w-full bg-black/50 p-4 rounded-xl text-white outline-none border border-green-500/30 mb-4" placeholder="Sustancia para simular 24h...">
+                    <button onclick="startTemporalSim()" class="w-full bg-green-600 text-black font-black py-4 rounded-xl">INICIAR SIMULACIÓN</button>
                 </div>
-                <div class="glass-panel p-6 rounded-3xl">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase mb-4">Posibles Mutaciones / Efectos</h3>
-                    <div id="mutationLog" class="space-y-2 text-[11px]">
-                        <p class="text-slate-600 italic">Esperando inicio de secuencia...</p>
-                    </div>
+                <div class="glass-panel p-6 rounded-3xl text-[11px] space-y-2" id="mutationLog">
+                    <p class="text-slate-500 italic">Datos de mutación en espera...</p>
                 </div>
             </div>
-
-            <div class="glass-panel p-6 rounded-3xl border-t-4 border-indigo-500">
-                <h3 class="text-[10px] font-bold text-indigo-400 uppercase mb-2">Reporte de Análisis Narrativo (Explicación para No Expertos)</h3>
-                <div id="narrativeBox" class="h-48 overflow-y-auto scroll-custom text-sm leading-relaxed text-slate-200 font-sans italic">
-                    El sistema está en espera. Por favor, cargue una sustancia para generar el reporte de comportamiento molecular.
-                </div>
+            <div class="glass-panel p-8 rounded-3xl border-t-4 border-indigo-500">
+                <h3 class="text-xs font-bold text-indigo-400 uppercase mb-4 tracking-widest">Reporte Narrativo</h3>
+                <div id="narrativeBox" class="text-sm italic leading-relaxed text-slate-300">Cargue una sustancia para generar el análisis explicativo.</div>
             </div>
         </div>
     </div>
 
-    <header class="max-w-7xl mx-auto mb-6">
-        <h1 class="text-2xl font-black text-white italic">Bio<span class="text-indigo-500">OS</span> QUANTUM <span class="text-[10px] bg-indigo-900 px-2 py-1 rounded ml-2">VERSION 10.0</span></h1>
+    <header class="max-w-7xl mx-auto mb-10">
+        <h1 class="text-4xl font-black text-white tracking-tighter italic">Bio<span class="text-indigo-500">OS</span> QUANTUM <span class="text-xs bg-indigo-600 px-3 py-1 rounded ml-3 uppercase">v10.1 RESTORATION</span></h1>
     </header>
 
-    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-4 space-y-4">
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-4 space-y-6">
             <div class="glass-panel p-6 rounded-3xl border-l-4 border-pink-500">
-                <label class="text-[10px] font-bold text-pink-500 uppercase block mb-2 underline">Editor de ADN</label>
-                <textarea id="dnaInput" class="w-full h-20 bg-transparent text-white text-xs outline-none resize-none" placeholder="ATGC..."></textarea>
-                <button onclick="runDNA()" class="w-full mt-2 bg-pink-600 hover:bg-pink-500 text-white font-bold py-2 rounded-xl text-[10px] transition-all">PREDECIR PROTEÍNA</button>
+                <label class="text-[10px] font-bold text-pink-500 uppercase block mb-3 underline">Editor de ADN</label>
+                <textarea id="dnaInput" class="w-full h-24 bg-transparent text-white text-xs outline-none" placeholder="ATGC..."></textarea>
+                <button onclick="runDNA()" class="w-full mt-3 bg-pink-600 text-white font-bold py-2 rounded-xl text-[10px]">PREDECIR</button>
             </div>
 
-            <div class="glass-panel p-6 rounded-3xl border-l-4 border-indigo-500" id="mainForge">
-                <label class="text-[10px] font-bold text-indigo-400 uppercase block mb-2 underline">Sintetizador Rápido</label>
-                <input id="subInput" type="text" class="w-full bg-black/40 p-4 rounded-xl text-white outline-none border border-white/10" placeholder="Ej: Insulina + Agua">
-                <button onclick="runForge()" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest transition-all">SINTETIZAR</button>
+            <div class="glass-panel p-6 rounded-3xl border-l-4 border-indigo-500">
+                <label class="text-[10px] font-bold text-indigo-400 uppercase block mb-3 underline">Sintetizador Rápido</label>
+                <input id="subInput" type="text" class="w-full bg-black/40 p-4 rounded-xl text-sm text-white outline-none" placeholder="Ej: Dengue + Carbono">
+                <button onclick="runForge()" class="w-full mt-4 bg-indigo-600 text-white font-black py-4 rounded-xl text-xs">SINTETIZAR</button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="stat-card p-5 rounded-2xl">
+                    <p class="text-[9px] font-bold text-slate-500 uppercase mb-2">Afinidad Terapéutica (Efectividad)</p>
+                    <div class="flex items-center gap-4">
+                        <span id="effVal" class="text-3xl font-black text-green-400">0%</span>
+                        <div class="flex-1 bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="effBar" class="bg-green-500 h-full transition-all duration-700" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="terminal" class="glass-panel p-4 rounded-2xl h-24 overflow-y-auto text-[9px] font-mono text-indigo-300 bg-black/40">
+                > Sistemas restaurados... listo para análisis.
             </div>
         </div>
 
         <div class="lg:col-span-8">
-            <div id="viewer3d" class="glass-panel"></div>
+            <div id="viewer3d"></div>
         </div>
     </main>
 
     <script>
         let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
         
-        function toggleMenu() { alert("Menú Pro: Escáner de curas y Filtro ético activos."); }
         function toggleSimPanel() { document.getElementById('simPanel').classList.toggle('hidden'); }
 
-        function startTemporalSim() {
-            const substance = document.getElementById('simInput').value || "Sustancia Desconocida";
-            const mutLog = document.getElementById('mutationLog');
-            const narrative = document.getElementById('narrativeBox');
+        function runForge() {
+            const input = document.getElementById('subInput').value.toLowerCase();
+            const eff = Math.floor(Math.random() * (95 - 35) + 35);
             
-            mutLog.innerHTML = `<p class="text-yellow-400 animate-pulse">> ANALIZANDO CICLO DE TIEMPO...</p>`;
-            narrative.innerHTML = `Iniciando análisis de <b>${substance}</b>. Estamos observando cómo la molécula interactúa con las células del cuerpo en un lapso simulado de 24 horas...`;
-
-            setTimeout(() => {
-                mutLog.innerHTML = `
-                    <p class="text-green-400">0-4h: Absorción plasmática optimizada.</p>
-                    <p class="text-green-400">4-12h: Unión a receptores exitosa.</p>
-                    <p class="text-red-400">18h: Mutación detectada en cadena lateral.</p>
-                    <p class="text-indigo-400">24h: Degradación enzimática iniciada.</p>
-                `;
-                
-                narrative.innerHTML = `
-                    <b>REPORTE FINAL:</b><br><br>
-                    1. <b>Efectos Buenos:</b> La sustancia <b>${substance}</b> muestra una gran capacidad para reducir la carga viral inicialmente. Es excelente para aliviar síntomas rápidos.<br><br>
-                    2. <b>Efectos Malos:</b> Tras 18 horas, el organismo intenta expulsar la sustancia, lo que podría causar una leve toxicidad hepática si se abusa de la dosis.<br><br>
-                    3. <b>Mutaciones:</b> Se observó que el virus intentó cambiar su forma (mutación) para escapar de <b>${substance}</b>, pero la simulación sugiere que agregar un enlace de Hidrógeno extra podría prevenir este escape.<br><br>
-                    4. <b>Conclusión:</b> Esta simulación ayuda a los científicos a saber que <b>${substance}</b> necesita ser reformulada para durar más tiempo en el cuerpo sin mutar.
-                `;
-                renderStructure("pdb:1SFO");
-            }, 2000);
+            document.getElementById('effVal').innerText = eff + "%";
+            document.getElementById('effBar').style.width = eff + "%";
+            document.getElementById('terminal').innerHTML += `<p>> Analizando afinidad para ${input}...</p>`;
+            
+            renderStructure("pdb:1SFO");
         }
 
-        function runForge() { renderStructure("pdb:1SFO"); }
+        function startTemporalSim() {
+            const sub = document.getElementById('simInput').value || "Sustancia";
+            const narrative = document.getElementById('narrativeBox');
+            const log = document.getElementById('mutationLog');
+            
+            log.innerHTML = `<p class="text-yellow-400">> Simulando efectos en 24h...</p>`;
+            setTimeout(() => {
+                log.innerHTML = `<p class="text-green-400">> 12h: Neutralización estable.</p><p class="text-red-400">> 22h: Mutación detectada.</p>`;
+                narrative.innerHTML = `<b>Simulación de ${sub}:</b> Se observa una efectividad inicial alta contra el virus, pero tras 22 horas la estructura viral intenta mutar para evadir la cura.`;
+            }, 1500);
+        }
+
         function runDNA() { renderStructure("pdb:1TRZ"); }
 
         function renderStructure(id) {
@@ -122,7 +122,7 @@
                 viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
                 viewer.zoomTo();
                 viewer.render();
-                viewer.animate({loop: "backAndForth", step: 1});
+                viewer.resize();
             });
         }
     </script>
