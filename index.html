@@ -3,160 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIS INFINITY | Apex Bio-OS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <title>BioOS v5.0 | Energy & Synthesis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
-        :root {
-            --bg-deep: #020408;
-            --panel: #0d1117;
-            --neon-blue: #58a6ff;
-            --neon-green: #3fb950;
-            --neon-red: #f85149;
-            --neon-purple: #bc8cff;
-            --border: 1px solid #30363d;
-        }
-
-        * { box-sizing: border-box; cursor: crosshair; }
-        body {
-            margin: 0; background: var(--bg-deep); color: #c9d1d9;
-            font-family: 'Rajdhani', sans-serif; overflow-x: hidden;
-        }
-
-        /* --- TOP BAR: CRITICAL MONITORING --- */
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 30px; background: rgba(13, 17, 23, 0.95); border-bottom: 2px solid var(--neon-blue);
-            position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(15px);
-        }
-        .os-identity { font-family: 'Orbitron'; font-size: 22px; color: var(--neon-blue); letter-spacing: 4px; }
-        .patient-card { 
-            display: flex; gap: 20px; font-size: 12px; border-left: 1px solid #333; padding-left: 20px;
-        }
-        .status-pulse { width: 10px; height: 10px; background: var(--neon-green); border-radius: 50%; display: inline-block; animation: blink 1.5s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        /* --- DASHBOARD GRID --- */
-        .app-grid {
-            display: grid; grid-template-columns: 360px 1fr 380px;
-            gap: 12px; padding: 12px; height: calc(100vh - 75px);
-        }
-
-        .module { 
-            background: var(--panel); border: var(--border); border-radius: 6px; 
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-        .module-head { 
-            background: rgba(255,255,255,0.03); padding: 10px 15px; 
-            font-family: 'Orbitron'; font-size: 10px; color: var(--neon-blue);
-            border-bottom: var(--border); display: flex; justify-content: space-between;
-        }
-
-        /* --- CENTRAL VIEWPORT: MULTIMEDIA HYBRID --- */
-        .viewport { flex-grow: 1; position: relative; background: #000; overflow: hidden; }
-        #video-feed { width: 100%; height: 100%; object-fit: cover; display: none; opacity: 0.7; filter: hue-rotate(180deg) brightness(1.2) contrast(1.1); }
-        #render-3d { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 140px; text-shadow: 0 0 30px var(--neon-blue); }
-        
-        .hud-scanline {
-            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: rgba(88, 166, 255, 0.2); animation: scan 4s linear infinite;
-        }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* --- INPUTS & CONTROLS --- */
-        .ui-scroll { padding: 15px; overflow-y: auto; flex-grow: 1; }
-        .field { margin-bottom: 15px; }
-        label { display: block; font-size: 10px; color: #8b949e; margin-bottom: 6px; font-weight: 600; }
-        select, input {
-            width: 100%; background: #010409; border: var(--border);
-            color: #fff; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; font-size: 15px;
-        }
-
-        .btn-prime {
-            width: 100%; padding: 16px; background: var(--neon-blue); color: #000;
-            border: none; border-radius: 4px; font-family: 'Orbitron'; font-weight: bold;
-            cursor: pointer; transition: 0.3s; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-        }
-        .btn-prime:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(88, 166, 255, 0.4); }
-
-        /* --- COMPARADOR DE DATOS --- */
-        .metric-box { 
-            background: rgba(0,0,0,0.4); padding: 12px; border-radius: 4px; border-left: 3px solid var(--neon-blue);
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .metric-val { font-family: 'Fira Code'; font-size: 18px; color: var(--neon-green); }
-
-        /* --- AI STRATEGY BOX --- */
-        .ai-intel {
-            background: rgba(188, 140, 255, 0.08); border: 1px solid var(--neon-purple);
-            padding: 15px; border-radius: 4px; margin: 15px;
-        }
-
-        /* --- EXTENDED SCROLL SECTION --- */
-        .data-deep-dive { padding: 60px 30px; background: #0d1117; border-top: var(--border); }
-        .heatmap {
-            display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 20px;
-        }
-        .heat-cell { height: 30px; background: #161b22; border-radius: 2px; }
-        .heat-high { background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { font-family: 'JetBrains Mono', monospace; background: #020617; color: #94a3b8; overflow-x: hidden; }
+        .dna-gradient { background: linear-gradient(90deg, #4f46e5, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #viewer3d { width: 100%; height: 500px; border-radius: 32px; background: radial-gradient(circle, #0f172a 0%, #020617 100%); }
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
+        .stat-card { background: rgba(30, 41, 59, 0.5); border-left: 4px solid #6366f1; }
+        .energy-glow { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); }
     </style>
 </head>
-<body>
+<body class="p-4 lg:p-10">
 
-<header>
-    <div class="os-identity">OMNIS INFINITY</div>
-    <div class="patient-card">
-        <div><label>ID:</label> #PX-2026</div>
-        <div><label>TIPO:</label> GEN-EDIT-H</div>
-        <div><label>STABIL:</label> <span class="status-pulse"></span> 98.4%</div>
-    </div>
-    <div style="font-family:'Fira Code'; font-size:11px; color:#555;">BIO-LINK: SECURED</div>
-</header>
+    <header class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter">Bio<span class="dna-gradient">OS</span> ENERGY v5.0</h1>
+            <p class="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.5em]">Quantum Molecular Architecture</p>
+        </div>
+        <div class="flex gap-4">
+            <input type="password" id="hfToken" placeholder="TOKEN HF" class="glass-panel px-4 py-2 rounded-xl text-xs w-40 focus:w-64 transition-all outline-none text-white">
+        </div>
+    </header>
 
-<main class="app-grid">
-    <aside class="module">
-        <div class="module-head">ENGINEERING_TERMINAL</div>
-        <div class="ui-scroll">
-            <div class="field">
-                <label>PATÓGENO DE REFERENCIA</label>
-                <select id="pato">
-                    <option>SARS-CoV-2 (Delta Variant)</option>
-                    <option>Glioblastoma Multiforme V4</option>
-                    <option>H5N1 Avian Influenza</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>VECTORES DE ENTREGA (ELEMENTOS)</label>
-                <select>
-                    <option>Lipid Nanoparticles (LNP)</option>
-                    <option>Adeno-Associated Virus (AAV9)</option>
-                    <option>Synthetic Exosomes</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>DOSIFICACIÓN DE PRECISIÓN (nM)</label>
-                <input type="number" value="12.50" step="0.01">
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-4 space-y-6">
+            
+            <div class="glass-panel p-6 rounded-[2rem] border-t border-cyan-500/30 energy-glow">
+                <label class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-3">Laboratorio de Fusión</label>
+                <input id="substanceInput" type="text" class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl text-sm text-white outline-none focus:border-cyan-500 transition-all mb-4" placeholder="Ej: Glucosa + Grasa">
+                
+                <button onclick="runAdvancedForge()" class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-4 rounded-2xl text-xs transition-all transform hover:scale-[1.02] shadow-xl shadow-cyan-900/20">
+                    SINTETIZAR Y CALCULAR ENERGÍA
+                </button>
             </div>
 
-            <button class="btn-prime" onclick="processGenome()">INICIAR SECUENCIACIÓN</button>
-
-            <div style="background:#000; padding:10px; margin-top:20px; border:1px solid #222; border-radius:4px;">
-                <label>LOGS DE PROCESAMIENTO</label>
-                <div id="logs" style="font-family:'Fira Code'; font-size:10px; color:var(--neon-green); height:110px; overflow-y:auto;">
-                    > System ready...
+            <div class="grid grid-cols-2 gap-4">
+                <div class="stat-card p-4 rounded-2xl">
+                    <p class="text-[9px] uppercase font-bold text-slate-500">Energía Resultante</p>
+                    <p id="energyVal" class="text-xl font-black text-white">0.00 <span class="text-[10px] text-indigo-400">kcal</span></p>
+                </div>
+                <div class="stat-card p-4 rounded-2xl border-cyan-500">
+                    <p class="text-[9px] uppercase font-bold text-slate-500">Estabilidad</p>
+                    <p id="stabilityVal" class="text-xl font-black text-white">--</p>
                 </div>
             </div>
-        </div>
-    </aside>
 
-    <div class="module">
-        <div class="module-head">
-            <span>REAL-TIME VISUALIZATION</span>
-            <div style="display:flex; gap:10px;">
-                <button onclick="switchView('3d')" style="background:none; border:1px solid var(--neon-blue); color:#fff; font-size:9px;">3D VIEW</button>
-                <button onclick="switchView('video')" style="background:none; border:1px solid var(--neon-blue); color:#fff; font-size:9px;">VIDEO LIVE</button>
+            <div class="glass-panel p-5 rounded-2xl h-48 overflow-y-auto text-[10px] font-mono leading-relaxed" id="terminal">
+                <p class="text-cyan-500">> Núcleo de energía en línea...</p>
+                <p class="text-slate-500">> Esperando comando de síntesis...</p>
             </div>
         </div>
-        <div class="viewport">
-            <div class="hud-scanline"></div>
-            <video id="video-feed" loop muted autoplay>
-                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp
+
+        <div class="lg:col-span-8 relative">
+            <div id="viewer3d" class="border border-white/5 shadow-2xl"></div>
+            
+            <div class="absolute top-6 right-6 flex flex-col gap-2">
+                <div class="glass-panel px-4 py-2 rounded-full text-[10px] text-white font-bold flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> IA ACTIVA: ESM-2
+                </div>
+            </div>
+
+            <div class="absolute bottom-8 left-8 z-10">
+                <h2 id="molName" class="text-4xl font-black text-white mb-1 drop-shadow-2xl">Sistema Forge</h2>
+                <p id="molFormula" class="text-cyan-400 font-bold tracking-widest text-sm uppercase">Seleccione sustancias para procesar</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
+        
+        const MOLECULES = {
+            "glucosa": { pdb: "pdb:1GZ8", name: "D-Glucosa", energy: 3.75, formula: "C6H12O6" },
+            "grasa": { pdb: "pdb:1LDF", name: "Lípido Complejo", energy: 9.20, formula: "C55H98O6" },
+            "insulina": { pdb: "pdb:1TRZ", name: "Insulina", energy: 1.2, formula: "C257H383N65O77S6" },
+            "colageno": { pdb: "pdb:1CAG", name: "Colágeno", energy: 2.1, formula: "Fibra Estructural" },
+            "agua": { pdb: "pdb:1H2O", name: "Agua", energy: 0.1, formula: "H2O" }
+        };
+
+        function runAdvancedForge() {
+            const input = document.getElementById('substanceInput').value.toLowerCase();
+            const terminal = document.getElementById('terminal');
+            
+            terminal.innerHTML += `<p class="text-white font-bold mt-2">> Iniciando proceso de forja...</p>`;
+
+            if (input.includes("+") || input.includes("mas")) {
+                const parts = input.split(/[+]|mas/).map(p => p.trim());
+                let totalEnergy = 0;
+                let foundAny = false;
+
+                parts.forEach(part => {
+                    if (MOLECULES[part]) {
+                        totalEnergy += MOLECULES[part].energy;
+                        foundAny = true;
+                        terminal.innerHTML += `<p class="text-cyan-400">> Agregando ${MOLECULES[part].name} (+${MOLECULES[part].energy} kcal/g)...</p>`;
+                    }
+                });
+
+                if (foundAny) {
+                    // Simulación de fusión 3D
+                    renderStructure("pdb:1SFO"); 
+                    document.getElementById('energyVal').innerText = totalEnergy.toFixed(2) + " kcal";
+                    document.getElementById('stabilityVal').innerText = (Math.random() * 100).toFixed(1) + "%";
+                    document.getElementById('molName').innerText = "Híbrido Recombinante";
+                    document.getElementById('molFormula').innerText = "Fusión de múltiples ligandos";
+                    terminal.innerHTML += `<p class="text-green-400 font-bold">> ÉXITO: Fusión molecular completada.</p>`;
+                }
+            } else {
+                // Búsqueda simple
+                if (MOLECULES[input]) {
+                    renderStructure(MOLECULES[input].pdb);
+                    document.getElementById('energyVal').innerText = MOLECULES[input].energy.toFixed(2) + " kcal";
+                    document.getElementById('stabilityVal').innerText = "98.2%";
+                    document.getElementById('molName').innerText = MOLECULES[input].name;
+                    document.getElementById('molFormula').innerText = MOLECULES[input].formula;
+                    terminal.innerHTML += `<p class="text-cyan-400">> Estructura de ${MOLECULES[input].name} cargada.</p>`;
+                } else {
+                    terminal.innerHTML += `<p class="text-red-400">> ERROR: Sustancia desconocida en base de datos local.</p>`;
+                }
+            }
+        }
+
+        function renderStructure(id) {
+            viewer.clear();
+            $3Dmol.download(id, viewer, {}, function() {
+                viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: { radius: 0.15 } });
+                viewer.zoomTo();
+                viewer.render();
+                viewer.animate({loop: "backAndForth", step: 1});
+            });
+        }
+    </script>
+</body>
+</html>
