@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIS INFINITY | CORE COMMAND</title>
+    <title>OMNIS INFINITY | ULTIMATE BIO-CORE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Fira+Code:wght@300;500&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --bg: #000000;
             --neon: #00d2ff;
             --danger: #ff3131;
             --green: #39ff14;
-            --panel: rgba(10, 12, 18, 0.95);
+            --panel-bg: rgba(5, 7, 10, 0.95);
+            --border: 1px solid rgba(0, 210, 255, 0.3);
         }
 
         * { box-sizing: border-box; cursor: crosshair; }
@@ -23,216 +25,256 @@
             font-family: 'Fira Code', monospace; overflow: hidden; 
         }
 
-        /* --- INTERFAZ MAESTRA --- */
-        .ui-wrapper {
+        /* --- LAYOUT MAESTRO --- */
+        .dashboard {
             display: grid;
-            grid-template-columns: 400px 1fr 400px;
-            grid-template-rows: 60px 1fr 250px;
+            grid-template-columns: 380px 1fr 380px;
+            grid-template-rows: 60px 1fr 200px;
             height: 100vh;
             gap: 10px;
             padding: 10px;
         }
 
-        .header { 
-            grid-column: 1 / -1; background: var(--panel); 
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            display: flex; align-items: center; padding: 0 20px;
-            font-family: 'Orbitron'; letter-spacing: 5px; font-size: 20px;
+        header {
+            grid-column: 1 / -1;
+            background: var(--panel-bg);
+            border: var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
+            font-family: 'Orbitron';
+            letter-spacing: 5px;
+            font-size: 20px;
+            color: var(--neon);
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
         }
 
-        .panel { 
-            background: var(--panel); 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex; flex-direction: column;
+        .panel {
+            background: var(--panel-bg);
+            border: var(--border);
+            display: flex;
+            flex-direction: column;
+            position: relative;
             overflow: hidden;
         }
 
-        .panel-title {
+        .panel-header {
             background: rgba(0, 210, 255, 0.1);
-            padding: 10px; font-size: 10px; font-family: 'Orbitron';
-            color: var(--neon); border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+            padding: 10px;
+            font-family: 'Orbitron';
+            font-size: 10px;
+            letter-spacing: 2px;
+            border-bottom: var(--border);
         }
 
-        /* --- VISOR HOLOGRÁFICO CENTRAL --- */
-        .hologram-viewport { 
-            grid-column: 2; grid-row: 2; 
-            background: #000; position: relative;
+        /* --- VISOR CENTRAL (EL ESPAGUETI 3D) --- */
+        .viewport-main {
+            grid-column: 2;
+            grid-row: 2;
+            background: #000;
+            position: relative;
             border: 2px solid var(--neon);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+            box-shadow: inset 0 0 50px rgba(0, 210, 255, 0.1);
         }
-        #render-canvas { width: 100%; height: 100%; outline: none; }
+        #canvas-3d { width: 100%; height: 100%; outline: none; }
 
-        .v3d-data {
-            position: absolute; bottom: 20px; left: 20px;
-            font-size: 11px; color: var(--green); pointer-events: none;
-            text-shadow: 0 0 5px #000;
+        .overlay-text {
+            position: absolute; top: 20px; left: 20px;
+            font-size: 11px; color: var(--green);
+            pointer-events: none; line-height: 1.5;
         }
 
         /* --- PANELES LATERALES --- */
-        .side-content { padding: 20px; flex-grow: 1; overflow-y: auto; }
+        .data-content { padding: 20px; flex-grow: 1; }
         
-        .vital-stat { 
-            border-left: 3px solid var(--neon); background: rgba(255,255,255,0.02);
-            padding: 15px; margin-bottom: 10px;
+        .stat-box {
+            background: rgba(255,255,255,0.02);
+            border-left: 3px solid var(--neon);
+            padding: 15px;
+            margin-bottom: 15px;
         }
-        .stat-label { font-size: 9px; color: #666; text-transform: uppercase; }
-        .stat-value { font-size: 24px; color: var(--neon); }
+        .label { font-size: 9px; color: #555; text-transform: uppercase; }
+        .value { font-size: 22px; color: var(--neon); margin-top: 5px; }
 
-        /* --- TERMINAL INFERIOR --- */
-        .terminal {
-            grid-column: 1 / -1; background: #050505;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px; font-size: 12px; color: var(--green);
-            overflow-y: auto; display: flex; flex-direction: column;
-        }
-
-        /* --- CONTROLES CRISPR --- */
-        .crispr-input {
-            width: 100%; height: 100px; background: #000; border: 1px solid #333;
-            color: var(--green); padding: 10px; font-family: 'Fira Code';
+        /* --- TERMINAL CRISPR --- */
+        .editor-area {
+            width: 100%; height: 120px;
+            background: #000; border: 1px solid #222;
+            color: var(--green); padding: 10px;
+            font-family: 'Fira Code'; font-size: 13px;
             resize: none; outline: none; margin-top: 10px;
         }
 
-        .btn-action {
-            width: 100%; padding: 15px; background: var(--neon); color: #000;
-            font-family: 'Orbitron'; font-weight: 900; border: none;
-            margin-top: 15px; cursor: pointer; transition: 0.3s;
+        /* --- FOOTER / LOGS --- */
+        .terminal-log {
+            grid-column: 1 / -1;
+            background: #050505;
+            border: var(--border);
+            padding: 15px;
+            font-size: 12px;
+            color: var(--green);
+            overflow-y: auto;
         }
-        .btn-action:hover { background: #fff; box-shadow: 0 0 20px var(--neon); }
+
+        /* --- ACCIONES --- */
+        .btn-action {
+            width: 100%; padding: 18px;
+            background: var(--neon); color: #000;
+            font-family: 'Orbitron'; font-weight: 900;
+            border: none; cursor: pointer;
+            transition: 0.3s; margin-top: 10px;
+        }
+        .btn-action:hover { background: #fff; box-shadow: 0 0 25px var(--neon); }
 
     </style>
 </head>
 <body>
 
-<div class="ui-wrapper">
-    <header class="header">
-        OMNIS <span style="color:var(--neon)">INFINITY</span> // BIOLAB_CORE_v22.0
-    </header>
+<div class="dashboard">
+    <header>OMNIS INFINITY // SYSTEM_CORE_v22.0</header>
 
     <aside class="panel">
-        <div class="panel-title">PATIENT_BIO_DATA</div>
-        <div class="side-content">
-            <div class="vital-stat">
-                <div class="stat-label">Heart Rate</div>
-                <div class="stat-value" id="bpm-val">72 BPM</div>
+        <div class="panel-header">BIO-SIGNALS // MONITORING</div>
+        <div class="data-content">
+            <div class="stat-box">
+                <div class="label">Heart Rate</div>
+                <div class="value" id="hr-val">72 BPM</div>
             </div>
-            <div class="vital-stat" style="border-color: var(--danger);">
-                <div class="stat-label">Status</div>
-                <div class="stat-value" style="color:var(--danger)">CRITICAL</div>
+            <div class="stat-box" style="border-color: var(--danger);">
+                <div class="label">Condition</div>
+                <div class="value" style="color:var(--danger)">CRITICAL</div>
             </div>
-            <div class="vital-stat">
-                <div class="stat-label">SpO2</div>
-                <div class="stat-value">94.1%</div>
+            <div class="stat-box">
+                <div class="label">Oxigenation SpO2</div>
+                <div class="value">94.8%</div>
             </div>
             <div style="margin-top:20px;">
-                <div class="stat-label">Infection Timeline</div>
-                <div style="height:4px; background:#222; margin-top:10px;">
-                    <div style="width:85%; height:100%; background:var(--danger);"></div>
+                <div class="label">Pathogen Growth</div>
+                <div style="height:6px; background:#111; margin-top:10px;">
+                    <div style="width:88%; height:100%; background:linear-gradient(90deg, var(--neon), var(--danger));"></div>
                 </div>
             </div>
         </div>
     </aside>
 
-    <main class="hologram-viewport">
-        <div id="render-canvas"></div>
-        <div class="v3d-data">
-            > GRID_MODE: ACTIVE<br>
+    <main class="viewport-main">
+        <div id="canvas-3d"></div>
+        <div class="overlay-text">
+            > RENDERING ORGANIC_HELIX...<br>
             > ZOOM: ENABLED<br>
-            > ORBIT: ENABLED<br>
-            > MAPPING NUCLEOTIDES...
+            > ROTATE: ENABLED<br>
+            > MAPPING NUCLEOTIDE_NODES...
         </div>
     </main>
 
     <aside class="panel">
-        <div class="panel-title">GENETIC_ENGINEERING</div>
-        <div class="side-content">
-            <div class="stat-label">CRISPR SEQUENCE</div>
-            <textarea class="crispr-input" spellcheck="false">ATGCGTACGTAGCTAGCTAGCTAGCTGATCGATCGTAGC</textarea>
+        <div class="panel-header">MOLECULAR_ENGINEERING</div>
+        <div class="data-content">
+            <div class="label">CRISPR GENE EDITOR</div>
+            <textarea class="editor-area" spellcheck="false">ATGC-OMNIS-CORE-DNA-SEQUENCE-REPAIR-V22</textarea>
             
             <div style="margin-top:30px;">
-                <div class="stat-label">SUCCESS PROBABILITY</div>
-                <div id="prob-val" style="font-size:32px; color:var(--green);">0.0%</div>
+                <div class="label">NEUTRALIZATION PROBABILITY</div>
+                <div id="prob-val" style="font-size:36px; color:var(--green);">0.0%</div>
             </div>
 
-            <div style="margin-top:20px; border: 1px solid var(--neon); padding: 15px;">
-                <div class="stat-label">ASSET VALUATION</div>
-                <div id="money-val" style="font-size:24px; color:var(--neon); font-weight:900;">$0.00</div>
+            <div style="margin-top:20px; border: 1px solid var(--neon); padding: 15px; background: rgba(0,210,255,0.02);">
+                <div class="label">IP MARKET VALUE (USD)</div>
+                <div id="money-val" style="font-size:24px; font-weight:900; color:var(--neon);">$0.00</div>
             </div>
 
-            <button class="btn-action" onclick="runSynthesis()">START SYNTHESIS</button>
+            <button class="btn-action" onclick="synthesize()">EXECUTE SYNTHESIS</button>
         </div>
     </aside>
 
-    <footer class="terminal" id="term-log">
-        > INITIALIZING OMNIS CORE...<br>
-        > CONNECTION ESTABLISHED WITH GLOBAL DATA NODES...<br>
-        > READY FOR MOLECULAR DOCKING SIMULATION...
+    <footer class="terminal-log" id="log-output">
+        > [SYSTEM] INITIALIZING OMNIS INTERFACE...<br>
+        > [DATA] LOADING GLOBAL PATHOGEN DATABASE...<br>
+        > [BIO] READY FOR ORGANIC SEQUENCING...
     </footer>
 </div>
 
 <script>
-    let scene, camera, renderer, controls, pathogen;
+    let scene, camera, renderer, controls, helix;
 
     function init3D() {
-        const container = document.getElementById('render-canvas');
+        const container = document.getElementById('canvas-3d');
         
-        // ESCENA
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.z = 40;
+        camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.z = 60;
 
-        // RENDERER
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setClearColor(0x000000, 1);
         container.appendChild(renderer.domElement);
 
-        // CONTROLES DE ÓRBITA (Zoom y Rotación total)
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // EL PATÓGENO (Icosaedro Viral)
-        const geometry = new THREE.IcosahedronGeometry(12, 1);
-        const material = new THREE.MeshPhongMaterial({ 
-            color: 0x00d2ff, wireframe: true, emissive: 0x00d2ff, emissiveIntensity: 0.5 
-        });
-        pathogen = new THREE.Mesh(geometry, material);
-        scene.add(pathogen);
+        // --- CREACIÓN DEL "ESPAGUETI" (HELICE ORGANICA) ---
+        const points = [];
+        for (let i = 0; i < 120; i++) {
+            points.push(new THREE.Vector3(
+                Math.sin(i * 0.2) * 12, 
+                (i - 60) * 0.6, 
+                Math.cos(i * 0.2) * 12
+            ));
+        }
 
-        // LUCES
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(20, 20, 20);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
+        const curve = new THREE.CatmullRomCurve3(points);
+        const geometry = new THREE.TubeGeometry(curve, 100, 0.8, 12, false);
+        
+        const material = new THREE.MeshPhongMaterial({ 
+            color: 0x00d2ff, 
+            wireframe: true,
+            emissive: 0x003344,
+            emissiveIntensity: 0.8
+        });
+
+        helix = new THREE.Mesh(geometry, material);
+        scene.add(helix);
+
+        // ILUMINACIÓN
+        const light1 = new THREE.PointLight(0x00d2ff, 1.5, 100);
+        light1.position.set(30, 30, 30);
+        scene.add(light1);
+
+        const light2 = new THREE.PointLight(0x39ff14, 1.5, 100);
+        light2.position.set(-30, -30, -30);
+        scene.add(light2);
+
+        scene.add(new THREE.AmbientLight(0x111111));
 
         function animate() {
             requestAnimationFrame(animate);
-            pathogen.rotation.y += 0.003;
+            helix.rotation.y += 0.005;
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
     }
 
-    function runSynthesis() {
-        const log = document.getElementById('term-log');
-        log.innerHTML += "<br>> SIMULATING MOLECULAR DOCKING...";
+    function synthesize() {
+        const log = document.getElementById('log-output');
+        log.innerHTML += "<br>> [IA] SIMULATING CRISPR REPAIR... SUCCESSFUL.";
+        
         setTimeout(() => {
             document.getElementById('prob-val').innerText = "99.4%";
             document.getElementById('money-val').innerText = "$6.42 TRILLION";
-            pathogen.material.color.setHex(0x39ff14);
-            pathogen.material.emissive.setHex(0x39ff14);
-            log.innerHTML += "<br>> SYNTHESIS COMPLETE. CURA DETECTED.";
-        }, 1500);
+            // El espagueti cambia a color "Curación" (Verde)
+            helix.material.color.setHex(0x39ff14);
+            helix.material.emissive.setHex(0x004411);
+        }, 1000);
     }
 
+    // Dinámica de signos vitales
     setInterval(() => {
-        document.getElementById('bpm-val').innerText = Math.floor(Math.random() * (78 - 72) + 72) + " BPM";
-    }, 2000);
+        document.getElementById('hr-val').innerText = Math.floor(Math.random() * (78 - 71) + 71) + " BPM";
+    }, 2500);
 
     window.onload = init3D;
     window.onresize = () => {
-        const c = document.getElementById('render-canvas');
+        const c = document.getElementById('canvas-3d');
         camera.aspect = c.clientWidth / c.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(c.clientWidth, c.clientHeight);
@@ -240,4 +282,5 @@
 </script>
 
 </body>
-</html>
+        </html>
+        
