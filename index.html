@@ -3,123 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v10.2 | Ultra-Stability</title>
+    <title>BioOS v11.0 | Clinical Precision</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        body { font-family: 'JetBrains Mono', monospace; background: #010409; color: #94a3b8; overflow: hidden; height: 100vh; }
-        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        #viewer3d { width: 100%; height: 100%; min-height: 400px; background: #000; border-radius: 2rem; }
-        .hidden { display: none; }
-        input, textarea { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(79, 70, 229, 0.3) !important; color: white !important; }
+        body { font-family: 'JetBrains Mono', monospace; background: #020617; color: #94a3b8; height: 100vh; overflow: hidden; }
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .input-dark { background: #000 !important; border: 1px solid #1e293b !important; color: #fff !important; font-size: 11px; }
+        #viewer3d { width: 100%; height: 100%; border-radius: 1.5rem; }
+        .accent-border { border-left: 3px solid #6366f1; }
     </style>
 </head>
-<body class="flex flex-col h-screen p-4 gap-4">
+<body class="flex h-screen p-4 gap-4">
 
-    <header class="flex justify-between items-center px-4">
-        <h1 class="text-xl font-black text-white italic tracking-tighter">Bio<span class="text-indigo-500">OS</span> v10.2</h1>
-        <div class="flex gap-2">
-            <button onclick="toggleSimPanel()" class="p-2 rounded-lg bg-green-600/20 border border-green-500/30 text-green-400 text-xs font-bold">⏱ SIMULACIÓN</button>
-            <button onclick="alert('Sistema Sentinel Activo')" class="p-2 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-white font-bold">⋮</button>
-        </div>
-    </header>
-
-    <div class="flex flex-1 gap-4 overflow-hidden">
+    <aside class="w-[380px] flex flex-col gap-3 overflow-y-auto pr-2 custom-scroll">
         
-        <div class="w-1/3 flex flex-col gap-4 overflow-y-auto pr-2">
+        <header class="mb-2">
+            <h1 class="text-xl font-black text-white italic tracking-tighter">Bio<span class="text-indigo-500">OS</span> <span class="text-[10px] bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/50 text-indigo-300 ml-2">V11.0 CLINICAL</span></h1>
+        </header>
+
+        <div class="glass-panel p-4 rounded-2xl accent-border">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Perfil Clínico del Paciente</p>
+                <span class="text-[8px] text-slate-500">OPCIONAL</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[8px] block mb-1">SEXO</label>
+                    <select id="pSex" class="input-dark w-full p-2 rounded-lg">
+                        <option value="avg">Promedio</option>
+                        <option value="m">Masculino</option>
+                        <option value="f">Femenino</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[8px] block mb-1">EDAD</label>
+                    <input id="pAge" type="number" class="input-dark w-full p-2 rounded-lg" placeholder="Años">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-[8px] block mb-1">PESO CORPORAL (KG)</label>
+                    <input id="pWeight" type="number" class="input-dark w-full p-2 rounded-lg" placeholder="Ej: 75">
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-4 rounded-2xl border-l-3 border-emerald-500">
+            <p class="text-[9px] font-bold text-emerald-400 uppercase mb-2">Análisis de Compuesto</p>
+            <input id="subInput" type="text" class="input-dark w-full p-3 rounded-lg mb-2" placeholder="Sustancia + Patógeno">
+            <button onclick="runAdvancedAnalysis()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-[10px] transition-all">EJECUTAR SIMULACIÓN CLÍNICA</button>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3">
+            <div class="glass-panel p-4 rounded-2xl border-l-3 border-sky-500">
+                <p class="text-[9px] font-bold text-sky-400 uppercase mb-2">Vida Media en Organismo (T1/2)</p>
+                <div class="flex items-baseline gap-2">
+                    <span id="timeVal" class="text-2xl font-black text-white">0.0</span>
+                    <span class="text-[10px] text-slate-500">Horas</span>
+                </div>
+                <p id="metabolismNote" class="text-[8px] text-slate-500 mt-1 italic">Basado en metabolismo estándar.</p>
+            </div>
             
-            <div class="glass-panel p-4 rounded-3xl border-l-4 border-pink-500">
-                <p class="text-[10px] font-bold text-pink-500 uppercase mb-2">Editor Genético</p>
-                <textarea id="dnaInput" class="w-full h-16 p-2 text-xs rounded-lg outline-none" placeholder="ATGC..."></textarea>
-                <button onclick="runDNA()" class="w-full mt-2 bg-pink-600 text-white font-bold py-2 rounded-xl text-[10px]">PREDECIR</button>
-            </div>
-
-            <div class="glass-panel p-4 rounded-3xl border-l-4 border-indigo-500">
-                <p class="text-[10px] font-bold text-indigo-400 uppercase mb-2">Sintetizador</p>
-                <input id="subInput" type="text" class="w-full p-3 text-sm rounded-lg outline-none" placeholder="Dengue + Carbono">
-                <button onclick="runForge()" class="w-full mt-2 bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">SINTETIZAR</button>
-            </div>
-
-            <div class="glass-panel p-4 rounded-3xl border-l-4 border-green-500">
-                <p class="text-[9px] font-bold text-slate-500 uppercase mb-2">Afinidad Terapéutica</p>
+            <div class="glass-panel p-4 rounded-2xl border-l-3 border-pink-500">
+                <p class="text-[9px] font-bold text-pink-500 uppercase mb-2">Afinidad Terapéutica</p>
                 <div class="flex items-center gap-3">
-                    <span id="effVal" class="text-2xl font-black text-green-400">0%</span>
-                    <div class="flex-1 bg-slate-800 h-2 rounded-full overflow-hidden">
-                        <div id="effBar" class="bg-green-500 h-full transition-all duration-500" style="width: 0%"></div>
+                    <span id="effVal" class="text-2xl font-black text-white">0%</span>
+                    <div class="flex-1 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div id="effBar" class="bg-pink-500 h-full transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
-
-            <div id="terminal" class="glass-panel p-3 rounded-2xl flex-1 text-[9px] font-mono text-indigo-300 overflow-y-auto">
-                > Sistema v10.2 listo...
-            </div>
         </div>
 
-        <div class="w-2/3 relative glass-panel rounded-3xl overflow-hidden p-2">
-            <div id="viewer3d"></div>
+        <div id="terminal" class="glass-panel p-3 rounded-xl flex-1 text-[9px] font-mono text-emerald-500/70 overflow-y-auto bg-black/50">
+            > Esperando parámetros de entrada...
         </div>
-    </div>
+    </aside>
 
-    <div id="simPanel" class="hidden fixed inset-0 z-50 bg-black/95 p-10">
-        <div class="max-w-4xl mx-auto h-full flex flex-col gap-6">
-            <div class="flex justify-between items-center text-green-400 font-black italic">
-                <span>CRONOS SIMULATOR</span>
-                <button onclick="toggleSimPanel()" class="text-white">CERRAR [X]</button>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass-panel p-6 rounded-3xl">
-                    <input id="simInput" type="text" class="w-full p-4 rounded-xl mb-4" placeholder="Sustancia...">
-                    <button onclick="startTemporalSim()" class="w-full bg-green-600 text-black font-bold py-3 rounded-xl">SIMULAR 24H</button>
-                </div>
-                <div id="mutationLog" class="glass-panel p-6 rounded-3xl text-[10px]">Esperando...</div>
-            </div>
-            <div id="narrativeBox" class="glass-panel p-6 rounded-3xl flex-1 text-sm italic text-slate-300 overflow-y-auto">
-                El reporte aparecerá aquí.
-            </div>
+    <main class="flex-1 glass-panel rounded-3xl relative overflow-hidden border border-white/5">
+        <div id="viewer3d"></div>
+        <div class="absolute bottom-6 left-6 pointer-events-none">
+            <p class="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">Molecular Render Engine v2.0</p>
         </div>
-    </div>
+    </main>
 
     <script>
         let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
-        
-        function toggleSimPanel() { document.getElementById('simPanel').classList.toggle('hidden'); }
 
-        function runForge() {
-            const input = document.getElementById('subInput').value || "Desconocido";
-            const eff = Math.floor(Math.random() * (98 - 30) + 30);
+        function runAdvancedAnalysis() {
+            const sub = document.getElementById('subInput').value || "Sustancia X";
+            const weight = parseFloat(document.getElementById('pWeight').value) || 70; // 70kg es el promedio humano
+            const age = parseInt(document.getElementById('pAge').value) || 30;
+            const terminal = document.getElementById('terminal');
+
+            // Lógica de Tiempo de Vida Media (Simulada)
+            // En farmacología, a mayor peso y edad, el metabolismo suele cambiar la vida media.
+            let baseTime = Math.random() * (12 - 4) + 4;
+            if(weight > 90) baseTime *= 1.2; // Metabolismo más lento en mayor masa
+            if(age > 65) baseTime *= 1.5;   // El hígado procesa más lento en adultos mayores
+
+            document.getElementById('timeVal').innerText = baseTime.toFixed(1);
+            document.getElementById('metabolismNote').innerText = weight === 70 && age === 30 ? 
+                "Cálculo basado en persona promedio." : 
+                `Ajustado para paciente de ${weight}kg / ${age} años.`;
+
+            // Efectividad
+            const eff = Math.floor(Math.random() * (99 - 45) + 45);
             document.getElementById('effVal').innerText = eff + "%";
             document.getElementById('effBar').style.width = eff + "%";
-            document.getElementById('terminal').innerHTML += `<p>> Analizando: ${input}</p>`;
+
+            terminal.innerHTML += `<p class="text-emerald-400">> Iniciando Docking Molecular para: ${sub}...</p>`;
+            terminal.innerHTML += `<p>> Calculando farmacocinética para paciente de ${weight}kg...</p>`;
+            
             renderStructure("pdb:1SFO");
         }
 
-        function startTemporalSim() {
-            const sub = document.getElementById('simInput').value || "Sustancia";
-            document.getElementById('mutationLog').innerHTML = `<p class='text-yellow-400'>Analizando evolución...</p>`;
-            setTimeout(() => {
-                document.getElementById('mutationLog').innerHTML = `<p class='text-green-400'>Estable 12h</p><p class='text-red-400'>Mutación 20h</p>`;
-                document.getElementById('narrativeBox').innerHTML = `<b>Análisis de ${sub}:</b> La sustancia bloquea el 80% de los receptores inicialmente, pero el virus desarrolla resistencia al final del ciclo.`;
-            }, 1000);
-        }
-
-        function runDNA() { renderStructure("pdb:1TRZ"); }
-
         function renderStructure(id) {
             viewer.clear();
-            // Truco para arreglar la pantalla negra: forzar redimensionamiento
-            setTimeout(() => {
-                $3Dmol.download(id, viewer, {}, function() {
-                    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
-                    viewer.zoomTo();
-                    viewer.render();
-                    viewer.resize(); 
-                });
-            }, 50);
+            $3Dmol.download(id, viewer, {}, function() {
+                viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+                viewer.zoomTo();
+                viewer.render();
+                viewer.resize();
+            });
         }
-        
-        // Redimensionar automáticamente si la ventana cambia
-        window.addEventListener('resize', () => { viewer.resize(); });
     </script>
 </body>
 </html>
