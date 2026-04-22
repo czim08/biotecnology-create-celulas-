@@ -3,294 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIS INFINITY | Ultimate Bio-Intelligence v18.0</title>
+    <title>OMNIS INFINITY | BIOGENETIC COMMAND & CONTROL v20.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@400;500&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;500&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-pure: #000000;
-            --panel-bg: #0a0c10;
-            --neon-cyan: #00d2ff;
+            --bg: #000000;
+            --panel: #0a0c12;
+            --neon-blue: #00d2ff;
             --neon-green: #39ff14;
             --neon-purple: #bc8cff;
             --neon-gold: #ffcc00;
-            --danger-red: #ff3131;
-            --border-glow: 1px solid rgba(0, 210, 255, 0.3);
+            --danger: #ff3131;
+            --border: 1px solid rgba(0, 210, 255, 0.2);
         }
 
         * { box-sizing: border-box; cursor: crosshair; }
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            background: var(--bg-pure); color: #e1e4e8; 
-            font-family: 'Rajdhani', sans-serif; overflow: hidden; 
+        body { margin: 0; background: var(--bg); color: #e1e4e8; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+
+        /* --- TOP NAV: STATUS BAR --- */
+        .status-bar {
+            height: 40px; background: #000; border-bottom: var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-family: 'Fira Code'; font-size: 10px; letter-spacing: 1px;
         }
 
-        /* --- INTERFAZ MAESTRA --- */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 360px 1fr 360px;
-            height: 100vh;
-            gap: 12px;
-            padding: 12px;
+        /* --- DASHBOARD PRINCIPAL --- */
+        .main-container {
+            display: grid; grid-template-columns: 400px 1fr 400px;
+            height: calc(100vh - 40px); gap: 10px; padding: 10px;
         }
 
-        .panel { 
-            background: var(--panel-bg); 
-            border: var(--border-glow); 
-            border-radius: 2px; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-        }
+        .panel { background: var(--panel); border: var(--border); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .panel-header { padding: 12px; font-family: 'Orbitron'; font-size: 11px; color: var(--neon-blue); border-bottom: var(--border); background: rgba(255,255,255,0.02); }
 
-        .panel-header { 
-            background: rgba(255,255,255,0.03); 
-            padding: 12px; 
-            font-family: 'Orbitron'; 
-            font-size: 11px; 
-            color: var(--neon-cyan); 
-            border-bottom: var(--border-glow);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        /* --- VISOR 3D (EL HOLOGRAMA) --- */
+        .viewport-3d { flex-grow: 1; background: radial-gradient(circle, #05080a 0%, #000 100%); position: relative; }
+        #canvas-hologram { width: 100%; height: 100%; outline: none; }
+        .v3d-overlay { position: absolute; top: 15px; left: 15px; font-family: 'Fira Code'; font-size: 11px; color: var(--neon-green); pointer-events: none; }
 
-        /* --- MONITOR DEL PACIENTE --- */
-        .patient-info { padding: 20px; flex-grow: 0; }
-        .patient-id { font-family: 'Orbitron'; font-size: 20px; color: var(--neon-green); margin-bottom: 5px; }
-        
-        .vital-signs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .vital-stat { background: #000; border: 1px solid #1a1d23; padding: 10px; border-radius: 4px; }
-        .stat-label { font-size: 9px; color: #555; text-transform: uppercase; }
-        .stat-value { font-family: 'Fira Code'; font-size: 20px; color: var(--neon-cyan); }
+        /* --- PACIENTE Y VIDEO FEED --- */
+        .video-container { width: 100%; height: 200px; background: #000; border-bottom: var(--border); position: relative; overflow: hidden; }
+        .thermal-overlay { position: absolute; inset: 0; background: linear-gradient(rgba(255,0,0,0.1) 50%, rgba(0,0,255,0.1) 100%); opacity: 0.4; }
+        .scan-line { width: 100%; height: 1px; background: var(--neon-green); position: absolute; top: 0; animation: scan 4s linear infinite; }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
 
-        /* --- LÍNEA DE TIEMPO --- */
-        .timeline-box { padding: 20px; border-top: 1px solid #1a1d23; }
-        .timeline-track { height: 4px; background: #1a1d23; position: relative; margin: 30px 0; }
-        .timeline-fill { height: 100%; background: linear-gradient(90deg, var(--neon-cyan), var(--danger-red)); width: 85%; }
-        .timeline-node { 
-            width: 14px; height: 14px; background: #fff; border-radius: 50%; 
-            position: absolute; top: -5px; left: 85%; 
-            box-shadow: 0 0 15px var(--danger-red); 
-        }
-        .timeline-label { position: absolute; top: 18px; font-size: 10px; color: #666; white-space: nowrap; }
+        .vital-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .vital-card { background: #000; border: 1px solid #1a1d23; padding: 12px; }
+        .vital-val { font-family: 'Fira Code'; font-size: 22px; color: var(--neon-blue); }
 
-        /* --- HOLOGRAMA 3D --- */
-        .viewport-3d { 
-            flex-grow: 1; 
-            background: #000; 
-            position: relative; 
-            border: 1px solid #111;
-        }
-        #hologram-target { width: 100%; height: 100%; outline: none; }
-        
-        .v3d-overlay {
-            position: absolute; top: 15px; left: 15px; pointer-events: none;
-            font-family: 'Fira Code'; font-size: 11px; color: var(--neon-green);
-            text-shadow: 0 0 5px #000;
-        }
+        /* --- CRISPR EDITOR --- */
+        .editor-box { padding: 15px; background: #000; border-top: var(--border); }
+        .dna-input { width: 100%; height: 100px; background: #020305; border: 1px solid #222; color: var(--neon-green); font-family: 'Fira Code'; padding: 10px; font-size: 13px; outline: none; resize: none; }
 
-        /* --- EDITOR CRISPR --- */
-        .editor-zone { padding: 15px; background: #000; border-top: var(--border-glow); }
-        .dna-text {
-            width: 100%; height: 80px; background: #05070a; border: 1px solid #222;
-            color: var(--neon-green); font-family: 'Fira Code'; padding: 12px;
-            font-size: 14px; letter-spacing: 2px; outline: none; resize: none;
-        }
+        /* --- BOTONES DE ACCIÓN --- */
+        .btn-core { width: 100%; padding: 18px; margin-top: 10px; background: var(--neon-blue); color: #000; font-family: 'Orbitron'; font-weight: 900; border: none; cursor: pointer; clip-path: polygon(0 0, 100% 0, 100% 75%, 95% 100%, 0 100%); transition: 0.3s; }
+        .btn-core:hover { background: #fff; box-shadow: 0 0 20px var(--neon-blue); }
 
-        /* --- ACCIONES IA --- */
-        .ia-console { flex-grow: 1; background: #020406; padding: 15px; font-family: 'Fira Code'; font-size: 12px; color: var(--neon-purple); overflow-y: auto; }
-        .btn-supreme {
-            width: calc(100% - 30px); margin: 15px; padding: 18px;
-            background: var(--neon-cyan); color: #000; font-family: 'Orbitron'; font-weight: 900;
-            border: none; cursor: pointer; transition: 0.3s;
-            clip-path: polygon(0 0, 95% 0, 100% 25%, 100% 100%, 5% 100%, 0 75%);
-        }
-        .btn-supreme:hover { background: #fff; box-shadow: 0 0 25px var(--neon-cyan); transform: translateY(-2px); }
+        /* --- SECCIONES INFERIORES (PROFUNDIDAD CIENTÍFICA) --- */
+        .deep-analysis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; padding: 40px 20px; background: #010204; border-top: 4px solid var(--neon-purple); }
+        .data-card { background: #0a0c12; border: 1px solid #1a1d23; padding: 25px; border-radius: 4px; }
+        .data-title { font-family: 'Orbitron'; font-size: 13px; color: var(--neon-purple); margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 5px; }
 
-        /* --- SCROLLBAR --- */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--neon-cyan); }
+        .tag { font-size: 10px; background: rgba(0, 210, 255, 0.1); padding: 3px 7px; border-radius: 3px; color: var(--neon-blue); margin-right: 5px; }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
+<div class="status-bar">
+    <div>SYSTEM: OMNIS-OS v20.0.4</div>
+    <div style="color:var(--neon-green)">● ENCRYPTED CONNECTION: AES-256-GCM</div>
+    <div id="clock">2026-04-22 10:15:32</div>
+</div>
+
+<div class="main-container">
     <aside class="panel">
-        <div class="panel-header">BIO-ARCHIVO: NIVEL 5</div>
-        <div class="patient-info">
-            <div class="patient-id">#PX-2026-INFIN</div>
-            <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Estado: <span style="color:var(--danger-red)">FASE CRÍTICA</span></div>
-            
-            <div class="vital-signs">
-                <div class="vital-stat">
-                    <div class="stat-label">Ritmo (BPM)</div>
-                    <div class="stat-value" id="bpm">72</div>
-                </div>
-                <div class="vital-stat">
-                    <div class="stat-label">Oxígeno SpO2</div>
-                    <div class="stat-value">94%</div>
-                </div>
+        <div class="panel-header">MONITOR DE SUJETO #PX-2026</div>
+        <div class="video-container">
+            <div class="thermal-overlay"></div>
+            <div class="scan-line"></div>
+            <div style="position:absolute; top:10px; left:10px; font-size:9px; color:red;">REC ● THERMAL_CAM</div>
+        </div>
+        
+        <div class="vital-grid">
+            <div class="vital-card">
+                <div style="font-size:9px; color:#555;">FRECUENCIA CARDÍACA</div>
+                <div class="vital-val"><span id="bpm-val">72</span> <small style="font-size:10px">BPM</small></div>
+            </div>
+            <div class="vital-card">
+                <div style="font-size:9px; color:#555;">SATURACIÓN O2</div>
+                <div class="vital-val">94 <small style="font-size:10px">%</small></div>
+            </div>
+            <div class="vital-card">
+                <div style="font-size:9px; color:#555;">PRESIÓN ARTERIAL</div>
+                <div class="vital-val">118/79</div>
+            </div>
+            <div class="vital-card">
+                <div style="font-size:9px; color:#555;">TEMP. CORPORAL</div>
+                <div class="vital-val" id="body-temp">38.4°C</div>
             </div>
         </div>
 
-        <div class="timeline-box">
-            <div style="font-size: 10px; color: var(--neon-cyan); letter-spacing: 1px;">PROGRESO DE LA PATOLOGÍA</div>
-            <div class="timeline-track">
-                <div class="timeline-fill"></div>
-                <div class="timeline-node">
-                    <div class="timeline-label" style="color:#fff; left:-20px;">HOY: DÍA 14</div>
-                </div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:9px; color:#444; margin-top: 5px;">
-                <span>DÍA 0 (EXPOSICIÓN)</span>
-                <span>RECUPERACIÓN</span>
-            </div>
-        </div>
-
-        <div class="panel-header">SELECCIÓN DE PATÓGENO</div>
-        <div style="padding: 15px;">
-            <select id="patho-select" style="width:100%; background:#000; color:white; border:1px solid #333; padding:10px; font-family:'Orbitron'; font-size:10px;">
-                <option value="virus">RETROVIRUS ICOSAÉDRICO</option>
-                <option value="cancer">MUTACIÓN ONCOGENÉTICA</option>
-                <option value="x">PATÓGENO X (DESCONOCIDO)</option>
-            </select>
-            
-            <div style="margin-top:20px;">
-                <label style="font-size:9px; color:#555;">TEMP. INCUBACIÓN: <span id="temp-val" style="color:var(--neon-purple)">37.0°C</span></label>
-                <input type="range" min="0" max="100" value="37" id="temp-slider" style="width:100%; margin-top:10px; accent-color:var(--neon-purple);">
-            </div>
+        <div class="panel-header">DATOS CLÍNICOS AVANZADOS</div>
+        <div style="padding:15px; font-size:12px; line-height:1.6;">
+            <div style="color:var(--danger)">ESTADO: TORMENTA DE CITOQUINAS DETECTADA</div>
+            <div style="margin-top:10px; color:#888;">El paciente presenta una degradación del tejido alveolar del 14%. Se requiere intervención molecular inmediata.</div>
         </div>
     </aside>
 
-    <main class="panel" style="border-width: 2px; border-color: var(--neon-cyan);">
+    <main class="panel" style="border-width: 2px; border-color: var(--neon-blue);">
         <div class="panel-header" style="display:flex; justify-content:space-between;">
-            <span>OMNIS HOLOGRAM CORE v18.0</span>
-            <span style="color:var(--neon-green)">MODO ÓRBITA ACTIVO</span>
+            <span>BIO-VISUALIZADOR HOLOGRÁFICO</span>
+            <span style="color:var(--neon-green)">SISTEMA ÓRBITA: ONLINE</span>
         </div>
         <div class="viewport-3d">
             <div class="v3d-overlay">
-                ANALYSIS: RUNNING<br>
-                ZOOM: ENABLED<br>
-                ROTATE: ENABLED
+                PATHOGEN: COVID-26-SUPREME<br>
+                SYMMETRY: ICOSAHEDRAL (T=3)<br>
+                GENOME: (+)ssRNA
             </div>
-            <div id="hologram-target"></div>
+            <div id="canvas-hologram"></div>
         </div>
-        <div class="editor-zone">
-            <div style="font-family:'Orbitron'; font-size:9px; color:var(--neon-purple); margin-bottom:8px;">EDITOR DE SECUENCIA CRISPR-CAS9 (GENOMA)</div>
-            <textarea class="dna-text" spellcheck="false">ATGCGTACGTAGCTAGCTAGCTAGCTGATCGATCGTAGC</textarea>
+        <div class="editor-box">
+            <div style="font-family:'Orbitron'; font-size:9px; color:var(--neon-purple); margin-bottom:8px;">SECUENCIACIÓN CRISPR-CAS9 (TARGET: PROTEÍNA S)</div>
+            <textarea class="dna-input" spellcheck="false">ATGCGTACGTAGCTAGCTAGCTAGCTGATCGATCGTAGCTAGCTAGCTAGCTGATCGATC</textarea>
         </div>
     </main>
 
     <aside class="panel">
-        <div class="panel-header">IA SUPREMA: LOGS</div>
-        <div class="ia-console" id="console">
-            > SISTEMA ONLINE...<br>
-            > BASE DE DATOS MUNDIAL CARGADA...<br>
-            > ESPERANDO SÍNTESIS MOLECULAR...
-        </div>
-        <div style="padding:20px; border-top:1px solid #1a1d23;">
-            <div style="font-size:10px; color:#555;">PROBABILIDAD DE CURACIÓN</div>
-            <div id="success-rate" style="font-size:36px; font-family:'Orbitron'; color:var(--neon-green); font-weight:900;">0%</div>
-            
-            <div style="margin-top:20px; padding:15px; border:1px solid var(--neon-gold); background:rgba(255,204,0,0.03);">
-                <div style="font-size:10px; color:var(--neon-gold);">VALUACIÓN IP (ESTIMADA)</div>
-                <div id="market-val" style="font-size:26px; font-weight:900;">$0.00</div>
+        <div class="panel-header">PROCESADOR DE IA CUÁNTICA</div>
+        <div style="padding:20px; flex-grow:1;">
+            <div style="background:rgba(188, 140, 255, 0.05); border:1px solid var(--neon-purple); padding:15px; border-radius:4px; font-size:13px; font-style:italic;">
+                "Iniciando simulación de Docking... Calculando Energía de Gibbs ($\Delta G$)... Afinidad detectada en el residuo Lys352. Probabilidad de neutralización: 99.4%."
             </div>
+            
+            <div style="margin-top:30px;">
+                <div style="font-size:10px; color:#555;">ÍNDICE DE CURACIÓN CALCULADO</div>
+                <div id="success-rate" style="font-size:48px; font-family:'Orbitron'; color:var(--neon-green); font-weight:900;">0%</div>
+            </div>
+
+            <div style="margin-top:30px; padding:20px; border:1px solid var(--neon-gold); background:rgba(255,204,0,0.02);">
+                <div style="font-size:10px; color:var(--neon-gold);">VALUACIÓN IP OMNIS INFINITY (USD)</div>
+                <div id="money-val" style="font-size:32px; font-weight:900; letter-spacing:1px;">$0.00</div>
+            </div>
+
+            <button class="btn-core" onclick="runSynthesis()">EJECUTAR SÍNTESIS MOLECULAR</button>
+            <button class="btn-core" style="background:none; border:1px solid var(--neon-blue); color:var(--neon-blue);" onclick="window.print()">GENERAR DOSSIER DE 6.4 BILLONES</button>
         </div>
-        <button class="btn-supreme" onclick="startSynthesis()">EJECUTAR SÍNTESIS</button>
-        <button class="btn-supreme" style="background:none; border:1px solid var(--neon-cyan); color:var(--neon-cyan); margin-top:0;" onclick="window.print()">GENERAR DOSSIER $6B</button>
     </aside>
 </div>
 
-<script>
-    let scene, camera, renderer, controls, object;
-
-    function init3D() {
-        const container = document.getElementById('hologram-target');
-        
-        // ESCENA Y CÁMARA
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.z = 40;
-
-        // RENDERER (FONDO NEGRO ABSOLUTO)
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setClearColor(0x000000, 1);
-        container.appendChild(renderer.domElement);
-
-        // CONTROLES DE ÓRBITA (Zoom, Rotar, Acercar)
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-
-        // OBJETO 3D (PATÓGENO)
-        const geometry = new THREE.IcosahedronGeometry(12, 1);
-        const material = new THREE.MeshPhongMaterial({ 
-            color: 0x00d2ff, 
-            wireframe: true,
-            emissive: 0x00d2ff,
-            emissiveIntensity: 0.5
-        });
-        object = new THREE.Mesh(geometry, material);
-        scene.add(object);
-
-        // LUCES
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(20, 20, 20);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
-
-        // BUCLE DE ANIMACIÓN
-        function animate() {
-            requestAnimationFrame(animate);
-            object.rotation.y += 0.003;
-            controls.update(); // Necesario para que funcione el zoom y rotación
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // RESIZE
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        });
-    }
-
-    // INTERACCIÓN DE USUARIO
-    document.getElementById('temp-slider').oninput = function(e) {
-        const val = e.target.value;
-        document.getElementById('temp-val').innerText = val + ".0°C";
-        // Reactividad visual: rojo si hay calor extremo
-        object.material.color.setHex(val > 50 ? 0xff3131 : 0x00d2ff);
-    };
-
-    function startSynthesis() {
-        const log = document.getElementById('console');
-        log.innerHTML += "<br>> ANALIZANDO DOCKING MOLECULAR...<br>> AFINIDAD DETECTADA.";
-        
-        setTimeout(() => {
-            document.getElementById('success-rate').innerText = "99.4%";
-            document.getElementById('market-val').innerText = "$6,842,000,000";
-            // Efecto de pulso en el holograma
-            object.scale.set(1.5, 1.5, 1.5);
-            setTimeout(() => object.scale.set(1, 1, 1), 300);
-        }, 1200);
-    }
-
-    // CORAZÓN DINÁMICO
-    setInterval(() => {
-        document.getElementById('bpm').innerText = Math.floor(Math.random() * (78 - 70) + 70);
-    }, 2500);
-
-    // INICIAR AL CARGAR
-    window.onload = init3D;
-</script>
-
-</body>
-</html>
+                
