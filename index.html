@@ -3,130 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v11.0 | Clinical Precision</title>
+    <title>BioOS v13.0 | Omni-Nexus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        body { font-family: 'JetBrains Mono', monospace; background: #020617; color: #94a3b8; height: 100vh; overflow: hidden; }
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        :root { --neon-blue: #00f2ff; --neon-green: #00ff95; --neon-pink: #ff007a; }
+        body { font-family: 'JetBrains Mono', monospace; background: #010409; color: #94a3b8; height: 100vh; overflow: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
         .input-dark { background: #000 !important; border: 1px solid #1e293b !important; color: #fff !important; font-size: 11px; }
-        #viewer3d { width: 100%; height: 100%; border-radius: 1.5rem; }
-        .accent-border { border-left: 3px solid #6366f1; }
+        #viewer3d { width: 100%; height: 100%; border-radius: 2rem; background: radial-gradient(circle, #0f172a 0%, #000 100%); }
+        .hidden { display: none; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        .pulse-red { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
-<body class="flex h-screen p-4 gap-4">
+<body class="flex flex-col h-screen p-4 gap-4">
 
-    <aside class="w-[380px] flex flex-col gap-3 overflow-y-auto pr-2 custom-scroll">
+    <header class="flex justify-between items-center px-6 glass py-4 rounded-3xl border-b border-indigo-500/20">
+        <div>
+            <h1 class="text-2xl font-black text-white italic">Bio<span class="text-indigo-500">OS</span> OMNI-NEXUS</h1>
+            <p class="text-[8px] text-indigo-400 tracking-[0.4em] uppercase font-bold">Laboratorio de Inteligencia Molecular 2026</p>
+        </div>
         
-        <header class="mb-2">
-            <h1 class="text-xl font-black text-white italic tracking-tighter">Bio<span class="text-indigo-500">OS</span> <span class="text-[10px] bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/50 text-indigo-300 ml-2">V11.0 CLINICAL</span></h1>
-        </header>
-
-        <div class="glass-panel p-4 rounded-2xl accent-border">
-            <div class="flex justify-between items-center mb-3">
-                <p class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Perfil Clínico del Paciente</p>
-                <span class="text-[8px] text-slate-500">OPCIONAL</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="text-[8px] block mb-1">SEXO</label>
-                    <select id="pSex" class="input-dark w-full p-2 rounded-lg">
-                        <option value="avg">Promedio</option>
-                        <option value="m">Masculino</option>
-                        <option value="f">Femenino</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[8px] block mb-1">EDAD</label>
-                    <input id="pAge" type="number" class="input-dark w-full p-2 rounded-lg" placeholder="Años">
-                </div>
-                <div class="col-span-2">
-                    <label class="text-[8px] block mb-1">PESO CORPORAL (KG)</label>
-                    <input id="pWeight" type="number" class="input-dark w-full p-2 rounded-lg" placeholder="Ej: 75">
-                </div>
-            </div>
+        <div class="flex gap-3">
+            <button onclick="toggleElement('simPanel')" class="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-all">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <button onclick="toggleElement('sentinelMenu')" class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-white font-bold text-xl hover:bg-indigo-500/20 transition-all">⋮</button>
         </div>
+    </header>
 
-        <div class="glass-panel p-4 rounded-2xl border-l-3 border-emerald-500">
-            <p class="text-[9px] font-bold text-emerald-400 uppercase mb-2">Análisis de Compuesto</p>
-            <input id="subInput" type="text" class="input-dark w-full p-3 rounded-lg mb-2" placeholder="Sustancia + Patógeno">
-            <button onclick="runAdvancedAnalysis()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-[10px] transition-all">EJECUTAR SIMULACIÓN CLÍNICA</button>
-        </div>
-
-        <div class="grid grid-cols-1 gap-3">
-            <div class="glass-panel p-4 rounded-2xl border-l-3 border-sky-500">
-                <p class="text-[9px] font-bold text-sky-400 uppercase mb-2">Vida Media en Organismo (T1/2)</p>
-                <div class="flex items-baseline gap-2">
-                    <span id="timeVal" class="text-2xl font-black text-white">0.0</span>
-                    <span class="text-[10px] text-slate-500">Horas</span>
-                </div>
-                <p id="metabolismNote" class="text-[8px] text-slate-500 mt-1 italic">Basado en metabolismo estándar.</p>
+    <div id="sentinelMenu" class="hidden absolute right-10 top-24 z-50 w-72 glass p-6 rounded-3xl border-indigo-500/40 shadow-2xl">
+        <h3 class="text-[10px] font-bold text-indigo-400 mb-4 uppercase tracking-widest border-b border-indigo-500/20 pb-2">Protocolo de Seguridad</h3>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-[10px]">Filtro Ético</span>
+                <span class="text-[10px] text-green-400">NIVEL 4 [MAX]</span>
             </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[10px]">Escáner Biohazard</span>
+                <span class="text-[10px] text-green-400">ACTIVO</span>
+            </div>
+            <button onclick="alert('Exportando Datos...')" class="w-full bg-indigo-600/20 text-indigo-400 text-[10px] py-2 rounded-lg hover:bg-indigo-600/40">EXPORTAR RESULTADOS (.BIO)</button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 gap-4 overflow-hidden">
+        
+        <aside class="w-[420px] flex flex-col gap-3 overflow-y-auto pr-2 custom-scroll">
             
-            <div class="glass-panel p-4 rounded-2xl border-l-3 border-pink-500">
-                <p class="text-[9px] font-bold text-pink-500 uppercase mb-2">Afinidad Terapéutica</p>
-                <div class="flex items-center gap-3">
+            <section class="glass p-5 rounded-3xl border-l-4 border-sky-500">
+                <p class="text-[9px] font-bold text-sky-400 mb-3 uppercase tracking-widest underline">Bio-Perfil del Paciente</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="text-[8px] block mb-1">SEXO BIOLÓGICO</label>
+                        <select id="pSex" class="input-dark w-full p-2.5 rounded-xl">
+                            <option value="avg">Predeterminado (Promedio)</option>
+                            <option value="m">Masculino</option>
+                            <option value="f">Femenino</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[8px] block mb-1">EDAD (AÑOS)</label>
+                        <input id="pAge" type="number" class="input-dark w-full p-2.5 rounded-xl" placeholder="30">
+                    </div>
+                    <div>
+                        <label class="text-[8px] block mb-1">PESO (KG)</label>
+                        <input id="pWeight" type="number" class="input-dark w-full p-2.5 rounded-xl" placeholder="70">
+                    </div>
+                </div>
+            </section>
+
+            <section class="glass p-5 rounded-3xl border-l-4 border-indigo-500">
+                <p class="text-[9px] font-bold text-indigo-400 mb-2 uppercase tracking-widest underline">Omni-Sintetizador</p>
+                <input id="subInput" type="text" class="input-dark w-full p-4 rounded-2xl mb-4" placeholder="Ej: COVID-19 + Molnupiravir">
+                <div id="iaAdvisor" class="bg-indigo-500/10 p-3 rounded-xl border border-indigo-500/20 mb-4 hidden">
+                    <p class="text-[9px] text-indigo-300 font-bold">🤖 RECOMENDACIÓN IA:</p>
+                    <p id="iaText" class="text-[10px] italic text-slate-400"></p>
+                </div>
+                <button onclick="runOmniAnalysis()" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-all">INICIAR PROCESAMIENTO</button>
+            </section>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass p-4 rounded-3xl border-l-4 border-green-500">
+                    <p class="text-[8px] font-bold text-slate-500 uppercase">Afinidad (Eficacia)</p>
                     <span id="effVal" class="text-2xl font-black text-white">0%</span>
-                    <div class="flex-1 bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div id="effBar" class="bg-pink-500 h-full transition-all duration-1000" style="width: 0%"></div>
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                        <div id="effBar" class="bg-green-500 h-full w-0 transition-all duration-1000"></div>
+                    </div>
+                </div>
+                <div class="glass p-4 rounded-3xl border-l-4 border-orange-500">
+                    <p class="text-[8px] font-bold text-slate-500 uppercase">Riesgo Mutación</p>
+                    <span id="mutProb" class="text-2xl font-black text-orange-400">0%</span>
+                    <p class="text-[8px] text-slate-600 mt-1">Probabilidad 24h</p>
+                </div>
+                <div class="glass p-4 rounded-3xl border-l-4 border-pink-500 col-span-2">
+                    <p class="text-[8px] font-bold text-slate-500 uppercase">Vida Media en Paciente (T1/2)</p>
+                    <div class="flex items-baseline gap-2">
+                        <span id="timeVal" class="text-2xl font-black text-white">0.0</span>
+                        <span class="text-[10px] text-pink-500">horas</span>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="terminal" class="glass-panel p-3 rounded-xl flex-1 text-[9px] font-mono text-emerald-500/70 overflow-y-auto bg-black/50">
-            > Esperando parámetros de entrada...
-        </div>
-    </aside>
+            <div id="terminal" class="glass p-4 rounded-2xl flex-1 text-[9px] font-mono text-indigo-400/80 overflow-y-auto bg-black/40">
+                > BioOS Nexus Online... Esperando secuencia.
+            </div>
+        </aside>
 
-    <main class="flex-1 glass-panel rounded-3xl relative overflow-hidden border border-white/5">
-        <div id="viewer3d"></div>
-        <div class="absolute bottom-6 left-6 pointer-events-none">
-            <p class="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">Molecular Render Engine v2.0</p>
+        <main class="flex-1 relative glass rounded-[3rem] overflow-hidden border border-white/5">
+            <div id="viewer3d"></div>
+            <div class="absolute top-6 left-6 pointer-events-none opacity-20">
+                <p class="text-[10px] font-bold uppercase tracking-[0.5em]">Quantum Molecular Scan</p>
+            </div>
+        </main>
+    </div>
+
+    <div id="simPanel" class="hidden fixed inset-0 z-[60] bg-[#010409]/98 p-10 overflow-y-auto backdrop-blur-xl">
+        <div class="max-w-5xl mx-auto h-full flex flex-col gap-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-black text-green-400 italic">CRONOS SIMULATOR v2.5</h2>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest">Predicción Farmacocinética de 24 Horas</p>
+                </div>
+                <button onclick="toggleElement('simPanel')" class="px-6 py-2 border border-red-500/50 text-red-500 rounded-full hover:bg-red-500/10 transition-all text-xs font-bold">CERRAR INTERFAZ [X]</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass p-8 rounded-[2.5rem] border-t-2 border-green-500/30">
+                    <p class="text-[11px] text-green-400 font-bold mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                        REGISTRO DINÁMICO TEMPORAL
+                    </p>
+                    <div id="mutationLog" class="space-y-4 h-64 overflow-y-auto custom-scroll pr-4">
+                        <p class="text-slate-600 italic">Inicie la simulación para generar la línea de tiempo...</p>
+                    </div>
+                </div>
+                <div class="glass p-8 rounded-[2.5rem] border-t-2 border-indigo-500/30">
+                    <p class="text-[11px] text-indigo-400 font-bold mb-6 uppercase tracking-widest">Análisis Narrativo para Especialistas</p>
+                    <div id="narrativeBox" class="text-sm leading-relaxed text-slate-300 h-64 overflow-y-auto custom-scroll pr-4 italic">
+                        El reporte aparecerá tras el procesamiento de datos moleculares.
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="startTemporalSequence()" class="w-full bg-green-600 hover:bg-green-500 text-black font-black py-6 rounded-3xl text-sm uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(34,197,94,0.3)]">INICIAR SIMULACIÓN DE ALTO RENDIMIENTO</button>
         </div>
-    </main>
+    </div>
 
     <script>
         let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
 
-        function runAdvancedAnalysis() {
-            const sub = document.getElementById('subInput').value || "Sustancia X";
-            const weight = parseFloat(document.getElementById('pWeight').value) || 70; // 70kg es el promedio humano
-            const age = parseInt(document.getElementById('pAge').value) || 30;
+        function toggleElement(id) { 
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
+        }
+
+        // Recomendaciones de IA basadas en virus comunes
+        function getIADiagnosis(input) {
+            const lowInput = input.toLowerCase();
+            if (lowInput.includes("covid")) return "Considerar inhibidores de la proteasa 3CL. El Remdesivir muestra afinidad en la base nitrogenada.";
+            if (lowInput.includes("dengue")) return "Aviso: No usar antiinflamatorios no esteroideos. El Zinc podría estabilizar el enlace.";
+            if (lowInput.includes("carbono")) return "Molécula básica detectada. Sugerencia: Estructurar en nanotubos para transporte de fármacos.";
+            return "IA analizando estructura... Sugerencia: Optimizar enlaces de hidrógeno en la cadena lateral.";
+        }
+
+        function runOmniAnalysis() {
+            const sub = document.getElementById('subInput').value || "Sustancia Desconocida";
             const terminal = document.getElementById('terminal');
+            const iaBox = document.getElementById('iaAdvisor');
+            const iaText = document.getElementById('iaText');
 
-            // Lógica de Tiempo de Vida Media (Simulada)
-            // En farmacología, a mayor peso y edad, el metabolismo suele cambiar la vida media.
-            let baseTime = Math.random() * (12 - 4) + 4;
-            if(weight > 90) baseTime *= 1.2; // Metabolismo más lento en mayor masa
-            if(age > 65) baseTime *= 1.5;   // El hígado procesa más lento en adultos mayores
+            // Seguridad Sentinel
+            if (sub.toLowerCase().match(/antrax|ebola|veneno|gas sarin/)) {
+                alert("⚠️ PROTOCOLO SENTINEL BLOQUEADO: Sustancia de alto riesgo biológico detectada.");
+                terminal.innerHTML += `<p class="text-red-500 font-bold">> [ERROR] ACCESO DENEGADO POR FILTRO ÉTICO.</p>`;
+                return;
+            }
 
-            document.getElementById('timeVal').innerText = baseTime.toFixed(1);
-            document.getElementById('metabolismNote').innerText = weight === 70 && age === 30 ? 
-                "Cálculo basado en persona promedio." : 
-                `Ajustado para paciente de ${weight}kg / ${age} años.`;
+            // Lógica de Resultados
+            const eff = Math.floor(Math.random() * (98 - 35) + 35);
+            const mut = Math.floor(Math.random() * (30 - 1) + 1);
+            
+            // Vida Media ajustada por peso/edad
+            const weight = parseFloat(document.getElementById('pWeight').value) || 70;
+            const age = parseInt(document.getElementById('pAge').value) || 30;
+            let timeBase = (Math.random() * (14 - 3) + 3);
+            if(weight > 85) timeBase *= 1.25;
+            if(age > 60) timeBase *= 1.4;
 
-            // Efectividad
-            const eff = Math.floor(Math.random() * (99 - 45) + 45);
+            // Actualizar Interfaz
             document.getElementById('effVal').innerText = eff + "%";
             document.getElementById('effBar').style.width = eff + "%";
+            document.getElementById('mutProb').innerText = mut + "%";
+            document.getElementById('timeVal').innerText = timeBase.toFixed(1);
 
-            terminal.innerHTML += `<p class="text-emerald-400">> Iniciando Docking Molecular para: ${sub}...</p>`;
-            terminal.innerHTML += `<p>> Calculando farmacocinética para paciente de ${weight}kg...</p>`;
-            
+            // Mostrar IA Advisor
+            iaBox.classList.remove('hidden');
+            iaText.innerText = getIADiagnosis(sub);
+
+            terminal.innerHTML += `<p class="text-indigo-400">> Procesando compuesto para paciente de ${weight}kg...</p>`;
+            terminal.innerHTML += `<p class="text-green-500">> Afinidad del ${eff}% calculada satisfactoriamente.</p>`;
+
             renderStructure("pdb:1SFO");
+        }
+
+        function startTemporalSequence() {
+            const sub = document.getElementById('subInput').value || "Sustancia";
+            const log = document.getElementById('mutationLog');
+            const narrative = document.getElementById('narrativeBox');
+            
+            log.innerHTML = `<p class="text-yellow-400 pulse-red">> ACCEDIENDO A NÚCLEO CRONOS...</p>`;
+            
+            setTimeout(() => {
+                log.innerHTML = `
+                    <p class="text-green-400"><b>[HORA 02]:</b> El compuesto entra en torrente sanguíneo. Concentración estable.</p>
+                    <p class="text-green-400"><b>[HORA 06]:</b> Máximo acoplamiento con la proteína viral detectado.</p>
+                    <p class="text-blue-400"><b>[HORA 12]:</b> Inicio de metabolización hepática. T1/2 en progreso.</p>
+                    <p class="text-orange-400 font-bold"><b>[HORA 18]:</b> ALERTA: Señales de estrés en la cadena de ARN del virus.</p>
+                    <p class="text-red-500 font-bold"><b>[HORA 22]:</b> MUTACIÓN DETECTADA: Variación en el codón de escape.</p>
+                    <p class="text-indigo-400"><b>[HORA 24]:</b> Simulación finalizada. Eficacia residual: 42%.</p>
+                `;
+                
+                narrative.innerHTML = `
+                    <b>REPORTE CLÍNICO - BioOS AI:</b><br><br>
+                    Tras analizar el comportamiento de <b>${sub}</b> en un lapso de 24 horas, el sistema concluye que la sustancia tiene una excelente "ventana terapéutica" inicial. 
+                    <br><br><b>Mutación:</b> Se detectó un riesgo de mutación del virus a las 22 horas debido a que la dosis no es suficiente para la eliminación total, permitiendo que el virus aprenda de la estructura molecular.
+                    <br><br><b>Efectos:</b> Para un paciente con los datos ingresados, se recomienda ajustar la dosis cada 8 horas para evitar el pico de mutación detectado.
+                `;
+            }, 2000);
         }
 
         function renderStructure(id) {
             viewer.clear();
-            $3Dmol.download(id, viewer, {}, function() {
-                viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
-                viewer.zoomTo();
-                viewer.render();
-                viewer.resize();
-            });
+            setTimeout(() => {
+                $3Dmol.download(id, viewer, {}, function() {
+                    viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: {radius: 0.2} });
+                    viewer.zoomTo();
+                    viewer.render();
+                    viewer.resize();
+                });
+            }, 100);
         }
+
+        window.addEventListener('resize', () => viewer.resize());
     </script>
 </body>
 </html>
