@@ -3,317 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v30.0 | SINGULARITY MASTER</title>
+    <title>BioOS v60.0 | OMNIS-INFINITY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;800&family=Outfit:wght@300;700;900&display=swap');
-        
-        :root { --p-accent: #6366f1; --p-danger: #ff4757; --p-success: #2ed573; --p-bg: #05070a; }
-        body.light-mode { --p-bg: #f0f2f5; --p-accent: #3742fa; }
-
-        body { font-family: 'Outfit', sans-serif; background: var(--p-bg); color: #a4b0be; height: 100vh; overflow: hidden; transition: 0.4s; }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;800&family=Outfit:wght@300;500;700;900&display=swap');
+        :root { --p-accent: #6366f1; --p-danger: #ef4444; --p-success: #10b981; --p-bg: #020617; }
+        body { font-family: 'Outfit', sans-serif; background: var(--p-bg); color: #9ca3af; height: 100vh; overflow: hidden; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        /* Glassmorphism Ultra */
-        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.08); border-radius: 3rem; }
-        .light-mode .glass { background: rgba(255, 255, 255, 0.9); border-color: rgba(0,0,0,0.1); }
-
-        /* Botones Fix */
-        .nav-link { transition: 0.4s; cursor: pointer; position: relative; z-index: 50; }
-        .nav-link.active { background: var(--p-accent); color: white; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4); }
-
-        #viewer3d { width: 100%; height: 100%; border-radius: 4rem; background: radial-gradient(circle, #13141f 0%, #000 100%); position: relative; z-index: 10; }
-        
-        /* Stats Animation */
-        .stat-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .stat-card:hover { border-color: var(--p-accent); transform: scale(1.02); }
-
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.05); }
+        .nav-link { cursor: pointer; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-link.active { background: var(--p-accent); color: white; transform: scale(1.1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); }
+        #viewer3d { width: 100%; height: 100%; border-radius: 3rem; background: #000; }
+        .input-dark { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.2rem; padding: 15px; color: white; font-size: 0.85rem; outline: none; width: 100%; }
+        .input-dark:focus { border-color: var(--p-accent); box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: var(--p-accent); border-radius: 10px; }
+        
+        /* Línea de Tiempo UI */
+        .timeline-track { position: relative; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 40px 0; }
+        .timeline-node { position: absolute; top: -6px; width: 16px; height: 16px; border-radius: 50%; background: #1e293b; border: 2px solid var(--p-accent); transition: 0.3s; cursor: pointer; }
+        .timeline-node.active { background: var(--p-accent); box-shadow: 0 0 15px var(--p-accent); transform: scale(1.3); }
+        .timeline-label { position: absolute; top: 20px; transform: translateX(-50%); font-size: 8px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
+
+        canvas#viralChart { max-height: 120px; }
     </style>
 </head>
-<body class="flex p-6 gap-6 h-screen">
+<body class="flex h-screen p-4 gap-4">
 
-    <nav class="w-28 glass flex flex-col items-center py-10 gap-8 shrink-0">
-        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-indigo-500/50 mb-4">
-            <span class="text-white font-black text-2xl italic">Ω</span>
+    <nav class="w-24 glass rounded-[3rem] flex flex-col items-center py-10 gap-8 shrink-0 border border-white/5">
+        <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/40">
+            <i data-lucide="shield-plus" class="text-white w-8 h-8"></i>
         </div>
-        
-        <button data-tab="lab" class="nav-link active p-5 rounded-3xl text-2xl" title="Laboratorio">🧪</button>
-        <button data-tab="patient" class="nav-link p-5 rounded-3xl text-2xl" title="Paciente">👤</button>
-        <button data-tab="cancer" class="nav-link p-5 rounded-3xl text-2xl" title="Oncología">🧬</button>
-        <button data-tab="notes" class="nav-link p-5 rounded-3xl text-2xl" title="Bitácora">📔</button>
-        <button data-tab="sim" class="nav-link p-5 rounded-3xl text-2xl" title="Simulación">🦠</button>
-        
-        <div class="mt-auto flex flex-col gap-4">
-            <button onclick="document.body.classList.toggle('light-mode')" class="p-4 rounded-full bg-white/5 border border-white/10">🌓</button>
-        </div>
+        <button data-tab="lab" class="nav-link active p-4 rounded-2xl"><i data-lucide="flask-conical"></i></button>
+        <button data-tab="patient" class="nav-link p-4 rounded-2xl"><i data-lucide="user-cog"></i></button>
+        <button data-tab="sim" class="nav-link p-4 rounded-2xl"><i data-lucide="microscope"></i></button>
+        <button data-tab="analysis" class="nav-link p-4 rounded-2xl"><i data-lucide="bar-chart-3"></i></button>
     </nav>
 
-    <main class="w-[600px] flex flex-col gap-6 shrink-0">
+    <section class="flex-1 flex flex-col gap-4">
         
-        <header class="glass p-8 flex justify-between items-center border-b border-indigo-500/20">
+        <header class="h-20 glass rounded-[2.5rem] flex items-center justify-between px-10 border border-white/5">
             <div>
-                <h1 class="text-3xl font-black text-white tracking-tighter">SINGULARITY <span class="text-indigo-500">v30</span></h1>
-                <p class="text-[10px] mono text-indigo-400 font-bold uppercase tracking-[0.4em]">Advanced Bio-Chemical OS</p>
+                <h1 class="text-2xl font-black text-white italic tracking-tighter">OMNIS <span class="text-indigo-500">INFINITY</span></h1>
+                <p class="text-[9px] mono text-slate-500 font-bold uppercase tracking-[0.4em]">Next-Gen Bio-Computation OS</p>
             </div>
-            <div class="text-right">
-                <span class="text-[10px] font-bold text-red-500 bg-red-500/10 px-4 py-1 rounded-full border border-red-500/30">BSL-4 TOTAL ACCESS</span>
+            <div class="flex gap-4 items-center">
+                <div class="text-right mr-4">
+                    <p class="text-[8px] font-bold text-slate-500 uppercase">Estado del Sujeto</p>
+                    <p id="header-status" class="text-xs font-black text-green-500 uppercase">Paciente Estable</p>
+                </div>
+                <button onclick="location.reload()" class="p-3 bg-white/5 rounded-xl hover:bg-white/10"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
             </div>
         </header>
 
-        <div class="glass flex-1 overflow-hidden flex flex-col">
-            <div id="content-area" class="flex-1 overflow-y-auto p-8 custom-scroll space-y-8">
+        <div class="flex-1 glass rounded-[3.5rem] p-10 overflow-hidden flex flex-col border border-white/5 relative">
+            <div id="content-area" class="flex-1 overflow-y-auto custom-scroll pr-4">
                 
-                <section id="tab-lab" class="tab-content space-y-6">
-                    <h2 class="text-xl font-bold text-white italic">Motor de Descubrimiento de Patógenos</h2>
-                    <div class="space-y-4">
-                        <div class="relative">
-                            <input id="pathogenSearch" type="text" class="w-full bg-black/50 border border-white/10 p-6 rounded-3xl text-white outline-none focus:border-indigo-500 transition-all" placeholder="Buscar 1,000+ patógenos (VIH, Cáncer, H5N1...)">
-                            <button id="searchBtn" class="absolute right-4 top-4 bg-indigo-600 p-3 rounded-2xl text-white hover:bg-indigo-500 transition-all">ANALIZAR</button>
+                <div id="tab-lab" class="tab-content space-y-8">
+                    <div class="space-y-2">
+                        <h2 class="text-3xl font-black text-white">Diseño de Terapia Dirigida</h2>
+                        <p class="text-sm text-slate-400">Vincule un patógeno con una sustancia para generar el modelo de IA.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black uppercase text-indigo-400 tracking-widest">Patógeno Objetivo</label>
+                            <input id="patInput" type="text" class="input-dark" placeholder="Ej: SARS-CoV-2, Glioblastoma, VIH...">
                         </div>
-                        <div id="pathogenResult" class="hidden animate-in fade-in slide-in-from-bottom p-6 bg-white/5 rounded-3xl border border-white/10 space-y-4">
-                            <div class="flex justify-between items-center">
-                                <h3 id="resName" class="text-2xl font-black text-indigo-400">---</h3>
-                                <span id="resTag" class="bg-red-500 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase">Clase I</span>
-                            </div>
-                            <p id="resDesc" class="text-xs leading-relaxed text-slate-300 italic"></p>
-                            <div class="grid grid-cols-2 gap-4 mt-4">
-                                <div class="stat-card p-4 rounded-2xl">
-                                    <p class="text-[9px] uppercase font-bold text-slate-500">Estructura PDB</p>
-                                    <p id="resPdb" class="text-white font-mono text-xl">----</p>
-                                </div>
-                                <div class="stat-card p-4 rounded-2xl">
-                                    <p class="text-[9px] uppercase font-bold text-slate-500">Tratamiento IA</p>
-                                    <p id="resTx" class="text-green-400 text-[10px] font-bold">CALCULANDO...</p>
-                                </div>
-                            </div>
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black uppercase text-indigo-400 tracking-widest">Agente Terapéutico</label>
+                            <input id="curInput" type="text" class="input-dark" placeholder="Ej: Anticuerpo Monoclonales, ARNm-1273...">
                         </div>
                     </div>
-                </section>
 
-                <section id="tab-patient" class="tab-content hidden space-y-6">
-                    <h2 class="text-xl font-bold text-white">Monitorización Sistémica</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="glass p-6 rounded-[2.5rem] space-y-4">
-                            <p class="text-xs font-bold uppercase text-indigo-400">Carga del Huésped</p>
-                            <div class="relative h-32 w-32 mx-auto">
-                                <svg class="w-full h-full" viewBox="0 0 36 36">
-                                    <path class="text-slate-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <path id="loadCircle" class="text-indigo-500" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                </svg>
-                                <div class="absolute inset-0 flex items-center justify-center font-black text-white text-xl" id="loadText">0%</div>
-                            </div>
+                    <button id="masterAnalysis" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 py-6 rounded-3xl text-white font-black text-sm uppercase tracking-[0.2em] hover:scale-[1.01] transition-all shadow-xl shadow-indigo-500/20">Iniciar Proyección Molecular e IA</button>
+
+                    <div id="ia-box" class="hidden animate-in fade-in slide-in-from-bottom p-8 bg-indigo-500/5 border border-indigo-500/20 rounded-[3rem] space-y-6">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-black text-white uppercase flex items-center gap-2"><i data-lucide="cpu" class="text-indigo-500"></i> Recomendación Maestra de la IA</h3>
+                            <span class="text-[10px] font-bold px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full">Protocolo Optimizado</span>
                         </div>
-                        <div class="glass p-6 rounded-[2.5rem] space-y-4">
-                            <p class="text-xs font-bold uppercase text-red-400">Riesgo Vital</p>
-                            <div class="h-20 flex items-end gap-1">
-                                <div class="bg-red-500 w-full h-[10%] rounded-t-lg"></div>
-                                <div class="bg-red-500 w-full h-[40%] rounded-t-lg"></div>
-                                <div class="bg-red-500 w-full h-[20%] rounded-t-lg"></div>
-                                <div class="bg-red-500 w-full h-[80%] rounded-t-lg animate-pulse"></div>
-                            </div>
+                        <div id="ia-text" class="text-xs text-slate-300 leading-relaxed space-y-4 italic"></div>
+                    </div>
+                </div>
+
+                <div id="tab-patient" class="tab-content hidden space-y-10">
+                    <h2 class="text-2xl font-black text-white">Fisiología del Sujeto y Evolución</h2>
+                    
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="bg-black/30 p-6 rounded-3xl border border-white/5">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase mb-2">Edad / Bio-Marcador</p>
+                            <input id="p-age" type="number" class="input-dark h-10" placeholder="30">
                         </div>
-                    </div>
-                </section>
-
-                <section id="tab-cancer" class="tab-content hidden space-y-6">
-                    <div class="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 p-8 rounded-[3rem] border border-indigo-500/30">
-                        <h2 class="text-xl font-black text-white italic mb-4">Módulo de Inmunoterapia Oncológica</h2>
-                        <p class="text-[11px] text-slate-300 mb-6 leading-relaxed">Diseñe proteínas CAR-T personalizadas para atacar receptores específicos de tumores malignos.</p>
-                        <select id="cancerType" class="w-full bg-black/40 p-4 rounded-2xl border border-white/10 text-white text-xs mb-4 outline-none">
-                            <option value="brca1">Carcinoma Mamario (BRCA1)</option>
-                            <option value="gbm">Glioblastoma Multiforme</option>
-                            <option value="leuk">Leucemia Mieloide Aguda</option>
-                            <option value="custom">Nueva Bacteria Benéfica Antitumoral</option>
-                        </select>
-                        <button id="synthOnco" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl text-[10px] uppercase tracking-widest hover:bg-indigo-500">Sintetizar Antígeno</button>
-                    </div>
-                    <div id="oncoLog" class="p-6 bg-black/40 rounded-3xl font-mono text-[9px] text-green-400 h-32 overflow-y-auto">
-                        > Sistema Oncológico en espera...
-                    </div>
-                </section>
-
-                <section id="tab-notes" class="tab-content hidden space-y-4 h-full">
-                    <h2 class="text-xl font-bold text-white">Archivo de Investigación</h2>
-                    <textarea id="mainNotes" class="w-full h-[400px] bg-black/20 p-8 rounded-[3rem] border border-white/5 text-white text-sm outline-none focus:border-indigo-500" placeholder="Redacte aquí sus descubrimientos..."></textarea>
-                </section>
-
-                <section id="tab-sim" class="tab-content hidden space-y-6">
-                    <div class="bg-black rounded-[3rem] border border-white/5 overflow-hidden">
-                        <canvas id="kineticCanvas" class="w-full h-80"></canvas>
-                        <div class="p-6 grid grid-cols-2 gap-4">
-                            <button onclick="spawn('virus')" class="bg-red-500/20 text-red-500 font-bold p-4 rounded-2xl text-[10px] uppercase">Célula Maligna</button>
-                            <button onclick="spawn('cure')" class="bg-green-500/20 text-green-500 font-bold p-4 rounded-2xl text-[10px] uppercase">Agente Curativo</button>
+                        <div class="bg-black/30 p-6 rounded-3xl border border-white/5">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase mb-2">Masa Corporal (kg)</p>
+                            <input id="p-weight" type="number" class="input-dark h-10" placeholder="70">
+                        </div>
+                        <div class="bg-black/30 p-6 rounded-3xl border border-white/5">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase mb-2">Comorbilidad</p>
+                            <select id="p-com" class="input-dark h-10 py-0 px-4">
+                                <option value="none">Sujeto Sano</option>
+                                <option value="renal">Insuficiencia Renal</option>
+                                <option value="cardio">Cardiopatía</option>
+                            </select>
                         </div>
                     </div>
-                </section>
+
+                    <div class="space-y-8">
+                        <h4 class="text-xs font-black text-indigo-400 uppercase tracking-widest">Cronología de Progresión de Patología</h4>
+                        <div class="timeline-track">
+                            <div class="timeline-node active" style="left: 0%" onclick="updateTimeline(0)"><span class="timeline-label">Exposición</span></div>
+                            <div class="timeline-node" style="left: 25%" onclick="updateTimeline(1)"><span class="timeline-label">Incubación</span></div>
+                            <div class="timeline-node" style="left: 50%" onclick="updateTimeline(2)"><span class="timeline-label">Fase Aguda</span></div>
+                            <div class="timeline-node" style="left: 75%" onclick="updateTimeline(3)"><span class="timeline-label">Intervención</span></div>
+                            <div class="timeline-node" style="left: 100%" onclick="updateTimeline(4)"><span class="timeline-label">Remisión</span></div>
+                        </div>
+                        <div id="timeline-desc" class="p-6 bg-white/5 rounded-2xl text-[10px] italic border-l-4 border-indigo-500">
+                            Punto 0: El organismo entra en contacto con el agente. No hay síntomas sistémicos.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-sim" class="tab-content hidden space-y-6 h-full flex flex-col">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-black text-white italic">Micro-Ambiente Biocinético</h2>
+                        <div id="viral-counter" class="text-[10px] font-bold text-red-500 mono">CARGA VIRAL: 0 UI/mL</div>
+                    </div>
+                    <div class="relative bg-black rounded-[3rem] border border-white/5 overflow-hidden flex-1 min-h-[300px]">
+                        <canvas id="kineticCanvas"></canvas>
+                        <div class="absolute top-6 left-6 flex gap-3">
+                            <button onclick="spawn('virus')" class="px-4 py-2 bg-red-600 text-white text-[9px] font-black rounded-xl uppercase">Infectar</button>
+                            <button onclick="spawn('cure')" class="px-4 py-2 bg-green-600 text-white text-[9px] font-black rounded-xl uppercase">Inyectar Cura</button>
+                        </div>
+                    </div>
+                    <div class="h-32 bg-black/40 rounded-3xl p-4 border border-white/5">
+                        <canvas id="viralChart"></canvas>
+                    </div>
+                </div>
 
             </div>
-
-            <div id="terminal" class="h-40 bg-black/60 p-6 font-mono text-[10px] text-indigo-400 border-t border-white/5 overflow-y-auto">
-                > [SYSTEM] Aethelgard Singularity Core 30.0 initialized.<br>
-                > [AUTH] Grado Científico Maestro detectado.<br>
-                > [READY] Base de datos PDB vinculada vía Cloud.
-            </div>
-        </div>
-    </main>
-
-    <section class="flex-1 glass relative p-4 flex flex-col gap-4">
-        <div id="viewer3d"></div>
-        <div class="absolute top-10 left-10 pointer-events-none">
-            <div class="bg-black/60 backdrop-blur-md px-8 py-4 rounded-full border border-white/10">
-                <span class="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Estructura Activa:</span>
-                <span id="molName" class="text-white font-bold ml-2">---</span>
-            </div>
-        </div>
-        <div class="h-32 bg-white/5 rounded-[3rem] border border-white/5 p-8 flex items-center justify-around">
-            <div class="text-center">
-                <p class="text-[8px] uppercase font-black text-slate-500 mb-1">Afinidad Ligando</p>
-                <p id="stat-afinity" class="text-2xl text-white font-black">--%</p>
-            </div>
-            <div class="w-px h-12 bg-white/10"></div>
-            <div class="text-center">
-                <p class="text-[8px] uppercase font-black text-slate-500 mb-1">Letalidad Proyectada</p>
-                <p id="stat-mort" class="text-2xl text-red-500 font-black">--%</p>
-            </div>
-            <div class="w-px h-12 bg-white/10"></div>
-            <div class="text-center">
-                <p class="text-[8px] uppercase font-black text-slate-500 mb-1">Estabilidad Molecular</p>
-                <p id="stat-stab" class="text-2xl text-indigo-400 font-black">--%</p>
-            </div>
+            
+            <footer id="terminal" class="h-20 mt-6 bg-black/50 rounded-2xl p-4 font-mono text-[9px] text-indigo-400 overflow-y-auto border border-white/5">
+                > [SYSTEM] OMNIS v60.0 Initialized...<br>
+                > [ML] Model "Proteus-9" ready for inference.
+            </footer>
         </div>
     </section>
 
+    <aside class="w-96 flex flex-col gap-4 shrink-0">
+        <div class="flex-1 glass rounded-[4rem] p-4 relative overflow-hidden flex flex-col">
+            <div class="flex-1 rounded-[3rem] overflow-hidden mb-4">
+                <div id="viewer3d"></div>
+            </div>
+            <div class="bg-black/40 p-6 rounded-[2.5rem] border border-white/5 space-y-3">
+                <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Análisis Molecular</p>
+                <h3 id="mol-name" class="text-xl font-black text-white italic">AETHEL-GEN</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-3 bg-white/5 rounded-2xl">
+                        <p class="text-[8px] text-slate-500 uppercase">Letalidad</p>
+                        <p id="mol-let" class="text-sm font-black text-red-500">0%</p>
+                    </div>
+                    <div class="text-center p-3 bg-white/5 rounded-2xl">
+                        <p class="text-[8px] text-slate-500 uppercase">Eficacia</p>
+                        <p id="mol-eff" class="text-sm font-black text-green-500">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
     <script>
-        // --- DATA ENGINE SUPREMO ---
-        const MASTER_DB = {
-            "vih": { name: "VIH-1 Retrovirus", pdb: "1HHP", desc: "Virus que ataca linfocitos T. Requiere terapia ART avanzada.", mort: "99%", stab: "85%", tx: "Inhibidores de Integrasa + Proteasa." },
-            "cancer": { name: "Tumor Maligno BRCA1", pdb: "1N5O", desc: "Mutación celular descontrolada. Sensible a inmunoterapia dirigida.", mort: "VAR", stab: "92%", tx: "Antígenos Quiméricos CAR-T." },
-            "ebola": { name: "Filovirus Ébola", pdb: "4IBK", desc: "Fiebre hemorrágica masiva. Nivel de bioseguridad 4.", mort: "88%", stab: "70%", tx: "Anticuerpos Monoclonales Inmazeb." },
-            "benefica": { name: "Bacteria Simbionte X-1", pdb: "6SBN", desc: "Organismo diseñado para sintetizar vitaminas y atacar patógenos.", mort: "0%", stab: "99%", tx: "No requiere; es el tratamiento." }
-        };
+        lucide.createIcons();
+        const viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
 
-        // --- NAVIGATION ENGINE (REPARADO) ---
-        const navButtons = document.querySelectorAll('.nav-link');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        navButtons.forEach(btn => {
+        // --- NAVEGACIÓN ---
+        document.querySelectorAll('.nav-link').forEach(btn => {
             btn.onclick = () => {
                 const target = btn.getAttribute('data-tab');
-                
-                // Reset buttons
-                navButtons.forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
-                // Reset contents
-                tabContents.forEach(content => content.classList.add('hidden'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
                 document.getElementById('tab-' + target).classList.remove('hidden');
-                
                 if(target === 'sim') resizeCanvas();
-                log(`Accediendo al módulo: ${target.toUpperCase()}`);
             };
         });
 
-        // --- 3D ENGINE ---
-        let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
+        // --- LÓGICA DE IA Y LABORATORIO ---
+        document.getElementById('masterAnalysis').onclick = () => {
+            const pat = document.getElementById('patInput').value || "Patógeno X";
+            const cur = document.getElementById('curInput').value || "Sustancia Y";
+            const age = document.getElementById('p-age').value || 30;
+            const com = document.getElementById('p-com').value;
 
-        function loadStructure(pdb) {
-            viewer.clear();
-            $3Dmol.download("pdb:" + pdb, viewer, {}, function() {
-                viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: { radius: 0.15 } });
-                viewer.zoomTo();
-                viewer.render();
+            document.getElementById('ia-box').classList.remove('hidden');
+            
+            // Simulación IA multicriterio
+            let letalidad = Math.floor(Math.random() * 40 + 50);
+            let eficacia = Math.floor(Math.random() * 30 + 65);
+            if(age > 60 || com !== 'none') eficacia -= 15;
+
+            document.getElementById('mol-name').innerText = cur.toUpperCase();
+            document.getElementById('mol-let').innerText = letalidad + "%";
+            document.getElementById('mol-eff').innerText = eficacia + "%";
+
+            const iaReport = [
+                `**Mecanismo:** El compuesto **${cur}** ha sido optimizado para el receptor de superficie de **${pat}**.`,
+                `**Perfil del Sujeto:** Con ${age} años y condición ${com}, se detecta un aumento en la barrera hematoencefálica.`,
+                `**Evolución:** La línea de tiempo proyecta que la fase aguda de **${pat}** se reducirá en un 40% bajo este tratamiento.`,
+                `**Recomendación:** Administrar dosis de carga de 500mg, seguido de mantenimiento basal por 14 días.`
+            ];
+            
+            document.getElementById('ia-text').innerHTML = iaReport.map(t => `<p>• ${t}</p>`).join("");
+            loadPDB(Math.random() > 0.5 ? "1HHP" : "6VXX");
+            log(`Análisis Supremum finalizado para ${cur}.`);
+        };
+
+        // --- LÍNEA DE TIEMPO LÓGICA ---
+        const timelineSteps = [
+            "Exposición: El agente entra en contacto con las células mucosas. Sin síntomas.",
+            "Incubación: Replicación viral exponencial silenciosa. Carga viral subiendo.",
+            "Fase Aguda: Tormenta de citoquinas detectada. Síntomas sistémicos máximos.",
+            "Intervención: Administración de la cura diseñada. Inicio de neutralización.",
+            "Remisión: Erradicación del 99.9% de los patógenos. El tejido inicia cicatrización."
+        ];
+
+        function updateTimeline(step) {
+            document.querySelectorAll('.timeline-node').forEach((n, i) => {
+                n.classList.toggle('active', i === step);
             });
+            document.getElementById('timeline-desc').innerText = `Punto ${step}: ${timelineSteps[step]}`;
+            log(`Línea de tiempo actualizada: Paso ${step}`);
+            
+            // Afectar simulación
+            if(step === 2) spawn('virus', 30);
+            if(step === 3) spawn('cure', 20);
         }
 
-        // --- BUSQUEDA & IA ---
-        document.getElementById('searchBtn').onclick = () => {
-            const query = document.getElementById('pathogenSearch').value.toLowerCase();
-            const result = document.getElementById('pathogenResult');
-            result.classList.remove('hidden');
-
-            const data = MASTER_DB[query] || {
-                name: query.toUpperCase() + " (Nueva Cepa)",
-                pdb: "1SFO",
-                desc: "Patógeno no registrado. La IA ha proyectado su estructura basándose en secuencias homólogas.",
-                mort: Math.floor(Math.random()*90) + "%",
-                stab: Math.floor(Math.random()*100) + "%",
-                tx: "Requiere síntesis de vacuna ARNm de amplio espectro."
-            };
-
-            document.getElementById('resName').innerText = data.name;
-            document.getElementById('resDesc').innerText = data.desc;
-            document.getElementById('resPdb').innerText = data.pdb;
-            document.getElementById('resTx').innerText = data.tx;
-            document.getElementById('molName').innerText = data.name;
-            document.getElementById('stat-mort').innerText = data.mort;
-            document.getElementById('stat-stab').innerText = data.stab;
-            document.getElementById('stat-afinity').innerText = Math.floor(Math.random()*40 + 60) + "%";
-            
-            loadStructure(data.pdb);
-            log(`Análisis estructural completado para: ${data.name}`);
-        };
-
-        // --- MÓDULO ONCOLOGÍA ---
-        document.getElementById('synthOnco').onclick = () => {
-            const type = document.getElementById('cancerType').value;
-            const logArea = document.getElementById('oncoLog');
-            logArea.innerHTML += `> Iniciando síntesis de antígeno ${type.toUpperCase()}...<br>`;
-            setTimeout(() => {
-                logArea.innerHTML += `> Recombinación genética completada. Eficacia proyectada: 94.2%<br>`;
-                logArea.scrollTop = logArea.scrollHeight;
-                loadStructure("1N5O");
-            }, 1500);
-        };
-
-        // --- SIMULADOR DE PARTÍCULAS ---
+        // --- MOTOR DE SIMULACIÓN Y GRÁFICO ---
         const canvas = document.getElementById('kineticCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-        function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+        let viralData = [0];
+        let viralLabels = [0];
+
+        const viralChart = new Chart(document.getElementById('viralChart'), {
+            type: 'line',
+            data: {
+                labels: viralLabels,
+                datasets: [{
+                    label: 'Carga Viral (Células Infectadas)',
+                    data: viralData,
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    fill: true,
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { 
+                    x: { display: false }, 
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 8 } } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        function resizeCanvas() { 
+            canvas.width = canvas.parentElement.offsetWidth; 
+            canvas.height = canvas.parentElement.offsetHeight; 
+        }
+
         class Particle {
             constructor(type) {
                 this.type = type;
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 6;
-                this.vy = (Math.random() - 0.5) * 6;
+                this.vx = (Math.random() - 0.5) * 3;
+                this.vy = (Math.random() - 0.5) * 3;
+                this.radius = type === 'healthy' ? 7 : 4;
+                this.infected = false;
             }
             update() {
                 this.x += this.vx; this.y += this.vy;
                 if(this.x<0 || this.x>canvas.width) this.vx*=-1;
                 if(this.y<0 || this.y>canvas.height) this.vy*=-1;
+
+                if(this.type === 'cure') {
+                    let target = particles.find(p => p.type === 'virus');
+                    if(target) {
+                        this.vx += (target.x - this.x) * 0.01;
+                        this.vy += (target.y - this.y) * 0.01;
+                    }
+                }
             }
             draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, 7, 0, Math.PI*2);
-                ctx.fillStyle = this.type === 'virus' ? '#ff4757' : '#2ed573';
-                ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+                if(this.type === 'healthy') ctx.fillStyle = this.infected ? '#7c3aed' : '#334155';
+                else if(this.type === 'virus') ctx.fillStyle = '#ef4444';
+                else ctx.fillStyle = '#10b981';
+                ctx.shadowBlur = this.type !== 'healthy' ? 10 : 0;
+                ctx.shadowColor = ctx.fillStyle;
                 ctx.fill();
             }
         }
-        function spawn(t) { for(let i=0; i<15; i++) particles.push(new Particle(t)); }
+
+        function spawn(t, count = 10) { for(let i=0; i<count; i++) particles.push(new Particle(t)); }
+        
+        let frameCount = 0;
         function animate() {
-            ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.3)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            let infectedCount = 0;
+
             particles.forEach((p, i) => {
                 p.update(); p.draw();
-                if(p.type === 'cure') {
-                    particles.forEach((p2, j) => {
-                        if(p2.type === 'virus' && Math.hypot(p.x-p2.x, p.y-p2.y) < 15) particles.splice(j, 1);
-                    });
-                }
+                if(p.infected) infectedCount++;
+
+                particles.forEach((p2, j) => {
+                    if(i === j) return;
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if(dist < p.radius + p2.radius) {
+                        if(p.type === 'cure' && p2.type === 'virus') particles.splice(j, 1);
+                        if(p.type === 'virus' && p2.type === 'healthy') p2.infected = true;
+                        if(p.type === 'cure' && p2.type === 'healthy') p2.infected = false;
+                    }
+                });
             });
-            requestAnimationFrame(animate);
-        }
 
-        function log(m) {
-            const t = document.getElementById('terminal');
-            t.innerHTML += `> ${new Date().toLocaleTimeString()} | ${m}<br>`;
-            t.scrollTop = t.scrollHeight;
-        }
-
-        window.onload = () => { resizeCanvas(); animate(); loadStructure("1SFO"); };
-    </script>
-</body>
-</html>
+            // Actualizar gráfico cada 30 cuadros
+            frameCount++;
