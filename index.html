@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v15.5 | Aethelgard Genesis Edition</title>
+    <title>BioOS v16.1 | Aethelgard Fixed Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        :root { --tox-red: #ff4757; --bio-green: #2ecc71; --sentinel-indigo: #6366f1; --warning-gold: #f1c40f; }
+        :root { --tox-red: #ff4757; --bio-green: #2ecc71; --sentinel-indigo: #6366f1; }
         body { font-family: 'JetBrains Mono', monospace; background: #010409; color: #94a3b8; height: 100vh; overflow: hidden; }
         .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.03); }
         .input-dark { background: #000 !important; border: 1px solid #1e293b !important; color: #fff !important; font-size: 11px; }
         #viewer3d { width: 100%; height: 100%; border-radius: 2rem; background: radial-gradient(circle, #0f172a 0%, #000 100%); }
+        #kineticCanvas { background: #000; border-radius: 1.5rem; width: 100%; height: 250px; display: block; }
         .hidden { display: none; }
         .tab-btn { border-bottom: 2px solid transparent; color: #64748b; transition: all 0.3s; cursor: pointer; }
         .tab-btn.active { border-color: var(--sentinel-indigo); color: white; font-weight: bold; }
-        .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
@@ -25,291 +25,208 @@
 
     <header class="flex justify-between items-center px-8 glass py-4 rounded-3xl border-b border-indigo-500/20">
         <div>
-            <h1 class="text-2xl font-black text-white italic tracking-tighter">Bio<span class="text-indigo-500">OS</span> GENESIS</h1>
-            <p class="text-[8px] text-indigo-400 tracking-[0.4em] uppercase font-bold">Aethelgard Advanced Bio-Engineering v15.5</p>
+            <h1 class="text-2xl font-black text-white italic tracking-tighter">Bio<span class="text-indigo-500">OS</span> v16.1</h1>
+            <p class="text-[8px] text-indigo-400 tracking-[0.4em] uppercase font-bold">Aethelgard Labs Fixed System</p>
         </div>
-        <div class="flex gap-6 items-center">
-            <div class="flex flex-col items-end">
-                <span class="text-[8px] text-slate-500 uppercase">Integridad del Sistema</span>
-                <div class="flex gap-1">
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="text-[10px] text-green-400 font-bold uppercase">BSL-4 Protocol</span>
-                </div>
+        <div class="flex gap-4">
+            <div id="statusIndicator" class="flex items-center gap-2 px-4 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] text-green-500 font-bold uppercase">Sistemas Nominal</span>
             </div>
-            <button onclick="toggleElement('simPanel')" class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-white hover:bg-indigo-500/20 transition-all">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            </button>
         </div>
     </header>
 
     <div class="flex flex-1 gap-4 overflow-hidden">
-        
-        <aside class="w-[500px] flex flex-col gap-3 glass p-4 rounded-3xl border border-white/5">
+        <aside class="w-[450px] flex flex-col gap-3 glass p-4 rounded-3xl border border-white/5">
             
             <div class="flex border-b border-white/10 mb-2 justify-around text-[9px] pb-2">
-                <button onclick="switchTab('lab')" id="tab-lab" class="tab-btn active px-2 py-1">🔬 SÍNTESIS</button>
-                <button onclick="switchTab('pathogens')" id="tab-pathogens" class="tab-btn px-2 py-1">🦠 PATÓGENOS</button>
-                <button onclick="switchTab('genesis')" id="tab-genesis" class="tab-btn px-2 py-1">🧬 GENESIS II</button>
-                <button onclick="switchTab('clinical')" id="tab-clinical" class="tab-btn px-2 py-1">🏥 VIABILIDAD</button>
+                <button onclick="switchTab('lab')" id="tab-lab" class="tab-btn active px-2 py-1">🔬 LAB</button>
+                <button onclick="switchTab('pathogens')" id="tab-pathogens" class="tab-btn px-2 py-1">🦠 AGENTES</button>
+                <button onclick="switchTab('genesis')" id="tab-genesis" class="tab-btn px-2 py-1">🧬 GENESIS</button>
+                <button onclick="switchTab('visual')" id="tab-visual" class="tab-btn px-2 py-1 text-indigo-400">🎬 VIDEO</button>
             </div>
 
             <div class="flex-1 overflow-y-auto pr-1 custom-scroll space-y-4">
                 
                 <div id="content-lab" class="space-y-3">
                     <section class="glass p-4 rounded-2xl border-l-4 border-indigo-500">
-                        <p class="text-[9px] font-bold text-indigo-400 mb-2 uppercase underline">Diseño de Compuestos</p>
-                        <div class="flex gap-2 mb-3">
-                            <input id="subInput" type="text" class="input-dark flex-1 p-3 rounded-xl" placeholder="Sustancia + Objetivo (Ej: Vancomicina + MRSA)">
-                            <button onclick="runLabsAnalysis()" class="bg-indigo-600 text-white px-4 rounded-xl text-[10px] font-bold">ANALIZAR</button>
-                        </div>
-                        <div id="iaAdvisor" class="bg-indigo-500/10 p-3 rounded-lg border border-indigo-500/20 hidden">
-                            <p class="text-[9px] text-indigo-300 font-bold uppercase">🤖 Heurística de la IA:</p>
-                            <p id="iaText" class="text-[10px] italic text-slate-400 mt-1"></p>
-                        </div>
+                        <p class="text-[9px] font-bold text-indigo-400 mb-2 uppercase">Sintetizador de Curas</p>
+                        <input id="subInput" type="text" class="input-dark w-full p-3 rounded-xl mb-3" placeholder="Sustancia + Patógeno">
+                        <button onclick="runLabsAnalysis()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-[10px] uppercase">ANALIZAR</button>
                     </section>
-
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="glass p-4 rounded-xl border-l-4 border-green-500">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase">Afinidad Química</p>
-                            <span id="effVal" class="text-2xl font-black text-white">0%</span>
-                            <div class="w-full bg-slate-800 h-1 rounded-full mt-2 overflow-hidden"><div id="effBar" class="bg-green-500 h-full w-0 transition-all duration-700"></div></div>
+                        <div class="glass p-3 rounded-xl border border-white/5 text-center">
+                            <p class="text-[8px] text-slate-500 mb-1">EFICACIA</p>
+                            <span id="effVal" class="text-xl font-bold text-white">0%</span>
                         </div>
-                        <div class="glass p-4 rounded-xl border-l-4 border-orange-500">
-                            <p class="text-[8px] font-bold text-slate-500 uppercase">Inestabilidad Genética</p>
-                            <span id="mutProb" class="text-2xl font-black text-orange-400">0%</span>
+                        <div class="glass p-3 rounded-xl border border-white/5 text-center">
+                            <p class="text-[8px] text-slate-500 mb-1">MUTACIÓN</p>
+                            <span id="mutProb" class="text-xl font-bold text-orange-400">0%</span>
                         </div>
                     </div>
                 </div>
 
                 <div id="content-pathogens" class="hidden space-y-3">
                     <section class="glass p-4 rounded-2xl border-l-4 border-yellow-500">
-                        <p class="text-[9px] font-bold text-yellow-500 mb-3 uppercase underline">Análisis de Desmantelamiento</p>
-                        <select id="pathogenSelect" onchange="updatePathogenInfo()" class="input-dark w-full p-3 rounded-lg mb-4">
-                            <option value="">Seleccione Patógeno...</option>
-                            <option value="hiv">VIH-1 (Retrovirus)</option>
-                            <option value="sars">SARS-CoV-2 (Betacoronavirus)</option>
-                            <option value="ebola">Ebolavirus (Filovirus)</option>
-                            <option value="mrsa">S. Aureus (Multirresistente)</option>
+                        <select id="pathogenSelect" onchange="updatePathogenInfo()" class="input-dark w-full p-3 rounded-lg mb-3">
+                            <option value="">Seleccionar Patógeno...</option>
+                            <option value="hiv">VIH (Virus)</option>
+                            <option value="sars">SARS-CoV-2 (Virus)</option>
+                            <option value="mrsa">MRSA (Bacteria)</option>
                         </select>
-                        <div id="pathogenDetails" class="space-y-3 text-[10px] text-slate-300">
-                            <p class="opacity-50 italic">Seleccione un objetivo para calcular puntos críticos de ruptura.</p>
-                        </div>
+                        <div id="pathogenDetails" class="text-[10px] text-slate-300 space-y-2"></div>
                     </section>
                 </div>
 
                 <div id="content-genesis" class="hidden space-y-3">
-                    <section class="glass p-4 rounded-2xl border-l-4 border-green-400">
-                        <p class="text-[9px] font-bold text-green-400 mb-2 uppercase underline">Configurador de Vida de Diseño</p>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="text-[8px] text-slate-500 block mb-1">PROYECTO BIOTECNOLÓGICO</label>
-                                <select id="bioTarget" class="input-dark w-full p-2 rounded-lg">
-                                    <option value="anti-hiv">Bacteria Centinela Anti-VIH</option>
-                                    <option value="plastic">Consumidor de PET (Bacteria)</option>
-                                    <option value="meat">Tejido Muscular Sintético</option>
-                                </select>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="text-[8px] text-slate-500 block mb-1">CHASIS BIOLÓGICO</label>
-                                    <select id="bioChassis" class="input-dark w-full p-2 rounded-lg text-[10px]">
-                                        <option value="e-coli">E. Coli (K-12)</option>
-                                        <option value="lacto">Lactobacillus</option>
-                                        <option value="myco">Mycoplasma Genitalium</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-[8px] text-slate-500 block mb-1">OPTIMIZACIÓN</label>
-                                    <select id="bioOpt" class="input-dark w-full p-2 rounded-lg text-[10px]">
-                                        <option value="bal">Balance Metabólico</option>
-                                        <option value="agg">Crecimiento Agresivo</option>
-                                        <option value="sec">Secreción Máxima</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button onclick="runGenesisSimulation()" class="w-full bg-green-500/20 border border-green-500/50 text-green-400 font-black py-3 rounded-xl text-[10px] uppercase hover:bg-green-500/30 transition-all">SINTETIZAR ORGANISMO</button>
-                        </div>
+                    <section class="glass p-4 rounded-2xl border-l-4 border-green-500">
+                        <p class="text-[9px] text-green-500 font-bold mb-2">DISEÑO DE VIDA SINTÉTICA</p>
+                        <button onclick="runGenesisSimulation()" class="w-full bg-green-500/20 text-green-500 font-bold py-3 rounded-xl text-[10px] uppercase border border-green-500/30">SECUENCIAR ADN</button>
                     </section>
-                    <div id="genesisLog" class="p-3 bg-black/60 rounded-xl text-[9px] font-mono text-green-400 h-40 overflow-y-auto border border-white/5 hidden"></div>
+                    <div id="genesisLog" class="p-3 bg-black/50 text-[9px] font-mono h-32 overflow-y-auto rounded-xl border border-white/5 hidden"></div>
                 </div>
 
-                <div id="content-clinical" class="hidden space-y-3">
-                    <section class="glass p-4 rounded-2xl border-l-4 border-red-500">
-                        <p class="text-[9px] font-bold text-red-500 mb-3 uppercase underline">Simulación de Supervivencia (In-Vivo)</p>
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-[9px] mb-1"><span>TASA DE SUPERVIVENCIA (pH 7.4)</span><span id="survVal">0%</span></div>
-                                <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden"><div id="survBar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[9px] mb-1"><span>CARGA METABÓLICA (G6PD)</span><span id="metaVal">0%</span></div>
-                                <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden"><div id="metaBar" class="h-full bg-yellow-500 transition-all duration-1000" style="width: 0%"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[9px] mb-1"><span>EVASIÓN INMUNE</span><span id="immVal">0%</span></div>
-                                <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden"><div id="immBar" class="h-full bg-purple-500 transition-all duration-1000" style="width: 0%"></div></div>
-                            </div>
+                <div id="content-visual" class="hidden space-y-3">
+                    <section class="glass p-4 rounded-2xl border-l-4 border-indigo-400">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-[9px] font-bold text-indigo-400 uppercase">Kinetic Video Monitor</p>
+                            <span class="text-[7px] px-2 py-0.5 rounded bg-red-500 text-white animate-pulse">REC</span>
+                        </div>
+                        <canvas id="kineticCanvas"></canvas>
+                        <div class="grid grid-cols-2 gap-2 mt-3">
+                            <button onclick="addParticle('pathogen')" class="bg-red-500/10 border border-red-500/30 text-red-400 p-2 rounded-lg text-[9px] font-bold">+ VIRUS</button>
+                            <button onclick="addParticle('agent')" class="bg-blue-500/10 border border-blue-500/30 text-blue-400 p-2 rounded-lg text-[9px] font-bold">+ CURA</button>
                         </div>
                     </section>
                 </div>
 
             </div>
-
-            <div id="terminal" class="glass p-3 rounded-2xl h-24 text-[9px] font-mono text-indigo-400/80 overflow-y-auto bg-black/50 custom-scroll">
-                > Sistema BioOS v15.5 inicializado...<br>
-                > BSL-4 Sentinel: Vigilancia activa.
+            
+            <div id="terminal" class="glass p-3 rounded-2xl h-24 text-[9px] font-mono text-indigo-400/80 overflow-y-auto bg-black/50">
+                > Sistema v16.1 parcheado. Listo.
             </div>
         </aside>
 
-        <main class="flex-1 relative glass rounded-[3rem] overflow-hidden border border-white/5">
+        <main class="flex-1 glass rounded-[3rem] overflow-hidden border border-white/5 relative">
             <div id="viewer3d"></div>
-            <div class="absolute top-6 right-8 flex gap-2">
-                <span class="status-pill bg-green-500/10 text-green-500 border border-green-500/20">Mol-Render Engine</span>
-                <span class="status-pill bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">Static Scan</span>
-            </div>
         </main>
     </div>
 
-    <div id="simPanel" class="hidden fixed inset-0 z-[100] bg-[#010409]/98 p-10 backdrop-blur-3xl overflow-y-auto">
-        <div class="max-w-4xl mx-auto space-y-6">
-            <div class="flex justify-between items-center border-b border-white/10 pb-6">
-                <h2 class="text-3xl font-black text-green-400 italic">LOG DE SECUENCIACIÓN TEMPORAL</h2>
-                <button onclick="toggleElement('simPanel')" class="text-red-500 border border-red-500/30 px-6 py-2 rounded-full text-xs font-bold hover:bg-red-500/10 transition-all">ABORTAR VISTA</button>
-            </div>
-            <div id="temporalLog" class="grid grid-cols-1 gap-4 text-[11px] font-mono leading-relaxed text-slate-400">
-                </div>
-        </div>
-    </div>
-
     <script>
+        // Inicializar Visor 3D
         let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
-
-        function toggleElement(id) { document.getElementById(id).classList.toggle('hidden'); }
 
         function switchTab(tabId) {
             document.querySelectorAll('[id^="content-"]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.remove('active'));
             document.getElementById('content-' + tabId).classList.remove('hidden');
             document.getElementById('tab-' + tabId).classList.add('active');
+            if(tabId === 'visual') resizeCanvas();
         }
 
-        // --- LÓGICA DE PATÓGENOS Y RECOMENDACIONES ---
-        const pathogenData = {
-            hiv: { 
-                name: "VIH-1", 
-                pdb: "1HHP", 
-                info: "Retrotranscriptasa inversa detectada. Envoltura lipídica con gp120.", 
-                destroy: "Sustancia sugerida: **Inhibidores de Integrasa (Dolutegravir)**. Destrucción física: Agentes caotrópicos o calor >56°C.",
-                rec: "Sugerencia: Crear bacteria comensal que secrete Cianovirina-N."
-            },
-            sars: { 
-                name: "SARS-CoV-2", 
-                pdb: "6VXX", 
-                info: "Proteína Spike en estado 'up'. Alta afinidad por ACE2.", 
-                destroy: "Sustancia sugerida: **Anticuerpos Monoclonales**. Destrucción física: Luz UVC 254nm o Etanol 70%.",
-                rec: "Sugerencia: Bloqueadores de proteasa TMPRSS2."
-            },
-            ebola: { 
-                name: "Ebolavirus", 
-                pdb: "4IBK", 
-                info: "Estructura filamentosa ARN monocatenario negativo.", 
-                destroy: "Sustancia sugerida: **Remdesivir** (GS-5734). Destrucción física: Hipoclorito al 0.5%.",
-                rec: "Sugerencia: Inhibición de la glicoproteína GP1,2."
-            },
-            mrsa: { 
-                name: "S. Aureus (MRSA)", 
-                pdb: "1MWU", 
-                info: "Pared celular de peptidoglicano altamente entrecruzada. Gen mecA presente.", 
-                destroy: "Sustancia sugerida: **Vancomicina / Linezolid**. Destrucción física: Autoclave 121°C.",
-                rec: "Sugerencia: Uso de bacteriófagos líticos."
-            }
+        // Lógica de Laboratorio
+        function runLabsAnalysis() {
+            const input = document.getElementById('subInput').value;
+            if(!input) return alert("Ingrese una sustancia.");
+            
+            const eff = Math.floor(Math.random() * 40 + 55);
+            document.getElementById('effVal').innerText = eff + "%";
+            document.getElementById('mutProb').innerText = Math.floor((100-eff)/4) + "%";
+            document.getElementById('terminal').innerHTML += `> Analizando: ${input}... Afinidad detectada.<br>`;
+            
+            renderStructure("pdb:1SFO");
+        }
+
+        // Lógica de Patógenos
+        const pData = {
+            hiv: "Estructura: Retrovirus. Punto débil: Enzima Integrasa. Recomendación: Dolutegravir.",
+            sars: "Estructura: Corona Spike. Punto débil: Proteasa Mpro. Recomendación: Paxlovid.",
+            mrsa: "Estructura: Coco Gram+. Punto débil: Pared celular. Recomendación: Vancomicina."
         };
 
         function updatePathogenInfo() {
             const val = document.getElementById('pathogenSelect').value;
             const details = document.getElementById('pathogenDetails');
-            if(!val) return;
-            const p = pathogenData[val];
-            details.innerHTML = `
-                <div class="p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10">
-                    <p class="text-indigo-400 font-bold mb-1">ANALISIS ESTRUCTURAL:</p>
-                    <p>${p.info}</p>
-                </div>
-                <div class="p-3 bg-red-500/5 rounded-xl border border-red-500/10">
-                    <p class="text-red-400 font-bold mb-1">ESTRATEGIA DE DESTRUCCIÓN:</p>
-                    <p>${p.destroy}</p>
-                </div>
-                <div class="p-3 bg-green-500/5 rounded-xl border border-green-500/10">
-                    <p class="text-green-400 font-bold mb-1">RECOMENDACIÓN GENESIS:</p>
-                    <p>${p.rec}</p>
-                </div>
-            `;
-            renderStructure("pdb:" + p.pdb);
+            if(pData[val]) {
+                details.innerHTML = `<p class="bg-indigo-500/10 p-3 rounded-xl border border-indigo-500/20">${pData[val]}</p>`;
+                renderStructure("pdb:1HHP");
+            }
         }
 
-        // --- LÓGICA DE LABORATORIO (AFINIDAD VINCULADA) ---
-        function runLabsAnalysis() {
-            const sub = document.getElementById('subInput').value.toLowerCase();
-            const terminal = document.getElementById('terminal');
-            const iaBox = document.getElementById('iaAdvisor');
-            
-            // Verificación de afinidad científica
-            let baseEff = 25;
-            if (sub.includes("inhibidor") || sub.includes("anticuerpo")) baseEff += 20;
-            if (sub.includes("monoclonal")) baseEff += 20;
-            if (sub.includes("vanco") || sub.includes("dolutegravir")) baseEff += 25;
-            
-            const eff = Math.min(99, baseEff + Math.floor(Math.random() * 10));
-            const mut = Math.floor((105 - eff) / 4);
-
-            document.getElementById('effVal').innerText = eff + "%";
-            document.getElementById('effBar').style.width = eff + "%";
-            document.getElementById('mutProb').innerText = mut + "%";
-
-            iaBox.classList.remove('hidden');
-            document.getElementById('iaText').innerText = eff > 70 ? 
-                "Afinidad molecular óptima detectada. El compuesto encaja en el bolsillo catalítico del objetivo." : 
-                "Afinidad baja. Se recomienda ajustar grupos funcionales polares para mejorar la unión de hidrógeno.";
-
-            terminal.innerHTML += `<p>> Análisis completado: Eficacia ${eff}% | Mutación ${mut}%</p>`;
-        }
-
-        // --- LÓGICA GENESIS: NUEVA VIDA ---
+        // Lógica de Genesis
         function runGenesisSimulation() {
-            const target = document.getElementById('bioTarget').value;
-            const chassis = document.getElementById('bioChassis').value;
-            const opt = document.getElementById('bioOpt').value;
             const log = document.getElementById('genesisLog');
-            const term = document.getElementById('terminal');
-
             log.classList.remove('hidden');
-            log.innerHTML = `<p class="text-white animate-pulse">> INICIANDO PROTOCOLO GENESIS II...</p>`;
-
-            // Cálculos de viabilidad
-            let survival = 60;
-            let burden = 40;
-            let evasion = 30;
-
-            if (chassis === 'lacto') { survival += 20; burden -= 10; } // Lactobacillus es más resistente in-vivo
-            if (opt === 'bal') { burden -= 20; survival += 10; }
-            if (opt === 'sec') { burden += 30; evasion -= 10; }
-
-            setTimeout(() => {
-                log.innerHTML = `
-                    <p>> Chasis: ${chassis.toUpperCase()} seleccionado.</p>
-                    <p>> Aplicando CRISPR-Cas9 para inserción de genes...</p>
-                    <p class="text-blue-400">> Inserción de casete de secreción: EXITOSA.</p>
-                    <p>> Optimizando ribosomas para carga metabólica...</p>
-                    <p class="text-white font-bold">> SECUENCIACIÓN DE ADN SINTÉTICO COMPLETA.</p>
-                `;
-                
-                updateClinical(survival, burden, evasion);
-                term.innerHTML += `<p class="text-green-400">> Nuevo organismo sintetizado: ${target.toUpperCase()}</p>`;
-                
-                if (target === 'anti-hiv') renderStructure("pdb:1HHP");
-                if (target === 'plastic') renderStructure("pdb:6SBN");
-            }, 1500);
+            log.innerHTML = "> Iniciando secuencia...<br>";
+            setTimeout(() => { log.innerHTML += "> Inserción de ADN exitosa.<br>> Organismo estable."; }, 1000);
         }
 
-        function updateClinical(s, b, e) {
-            document.getElementById('survVal').innerText = s + "%";
+        // --- MOTOR KINETIC VIDEO (PARCHEADO) ---
+        const canvas = document.getElementById('kineticCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 250;
+        }
+
+        class Particle {
+            constructor(type) {
+                this.type = type;
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 3;
+                this.vy = (Math.random() - 0.5) * 3;
+                this.radius = type === 'pathogen' ? 5 : 3;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.type === 'pathogen' ? '#ff4757' : '#2ecc71';
+                ctx.fill();
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+
+        function addParticle(type) {
+            for(let i=0; i<15; i++) particles.push(new Particle(type));
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                // Colisiones
+                if(p.type === 'agent') {
+                    particles.forEach((p2, j) => {
+                        if(p2.type === 'pathogen') {
+                            if(Math.hypot(p.x - p2.x, p.y - p2.y) < 10) {
+                                particles.splice(j, 1);
+                            }
+                        }
+                    });
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        function renderStructure(id) {
+            viewer.clear();
+            $3Dmol.download(id, viewer, {}, function() {
+                viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+                viewer.zoomTo(); viewer.render();
+            });
+        }
+
+        // Iniciar motor de video
+        resizeCanvas();
+        animate();
+    </script>
+</body>
+</html>
