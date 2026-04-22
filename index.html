@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v20.0 | OMNIS MASTER CODE</title>
+    <title>BioOS v21.0 | Aethelgard Legacy Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        :root { --sentinel: #6366f1; --danger: #ef4444; --success: #22c55e; }
-        body { font-family: 'JetBrains Mono', monospace; background: #020617; color: #94a3b8; height: 100vh; overflow: hidden; margin: 0; }
-        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-        .panel-active { border-color: var(--sentinel); box-shadow: 0 0 20px rgba(99, 102, 241, 0.1); }
+        :root { --accent: #6366f1; --bg: #020617; }
+        body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: #94a3b8; height: 100vh; overflow: hidden; margin: 0; }
+        .glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
         .input-dark { background: #000 !important; border: 1px solid #1e293b !important; color: #fff !important; font-size: 11px; outline: none; }
-        #viewer3d { width: 100%; height: 100%; border-radius: 2.5rem; background: radial-gradient(circle, #0f172a 0%, #000 100%); }
-        #kineticCanvas { background: #000; border-radius: 1.5rem; width: 100%; height: 300px; cursor: crosshair; }
-        .tab-btn { border-bottom: 2px solid transparent; color: #64748b; transition: 0.3s; cursor: pointer; padding: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        .tab-btn.active { border-color: var(--sentinel); color: white; background: rgba(99, 102, 241, 0.05); }
-        .status-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        #viewer3d { width: 100%; height: 100%; border-radius: 2rem; background: #000; }
+        #kineticCanvas { background: #000; border-radius: 1.5rem; width: 100%; height: 280px; border: 1px solid #1e293b; }
+        .tab-btn { border-bottom: 2px solid transparent; color: #64748b; transition: 0.3s; cursor: pointer; padding: 12px; font-size: 10px; font-weight: bold; }
+        .tab-btn.active { border-color: var(--accent); color: white; background: rgba(99, 102, 241, 0.1); }
+        .hidden { display: none !important; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
@@ -26,238 +24,153 @@
 <body class="flex flex-col h-screen p-4 gap-4">
 
     <header class="flex justify-between items-center px-8 glass py-4 rounded-3xl border-b border-indigo-500/30">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-            </div>
-            <div>
-                <h1 class="text-2xl font-black text-white italic tracking-tighter">BioOS <span class="text-indigo-500">OMNIS</span></h1>
-                <p class="text-[8px] text-indigo-400 tracking-[0.4em] uppercase font-bold">Aethelgard Master Terminal v20.0.4</p>
-            </div>
+        <div>
+            <h1 class="text-2xl font-black text-white italic tracking-tighter">BioOS <span class="text-indigo-500">LEGACY</span></h1>
+            <p class="text-[8px] text-indigo-400 tracking-[0.4em] uppercase font-bold">Protocolo de Investigación Avanzada v21.0</p>
         </div>
-        <div class="flex gap-8 items-center">
-            <div class="text-[9px] text-right border-r border-white/10 pr-6">
-                <p class="text-slate-500 uppercase font-bold">Protocolo Actual</p>
-                <p class="text-red-500 font-black status-pulse uppercase">Nivel de Bioseguridad BSL-4</p>
-            </div>
-            <div class="text-[9px]">
-                <p class="text-slate-500 uppercase">Estado Global</p>
-                <p class="text-green-500 font-bold uppercase">Sistemas Nominales</p>
+        <div class="flex gap-6 items-center">
+            <div class="text-right text-[9px]">
+                <p class="text-slate-500 uppercase">Estado del Bio-Reactor</p>
+                <p class="text-green-500 font-bold status-pulse">OPTIMIZADO</p>
             </div>
         </div>
     </header>
 
     <div class="flex flex-1 gap-4 overflow-hidden">
         
-        <aside class="w-[580px] flex flex-col gap-3 glass p-5 rounded-[2.5rem] border border-white/5 shadow-2xl">
+        <aside class="w-[500px] flex flex-col gap-3 glass p-5 rounded-[2.5rem] border border-white/5">
             
-            <nav class="flex border-b border-white/10 mb-4 justify-between">
-                <button onclick="switchTab('lab')" id="tab-lab" class="tab-btn active">🧬 Síntesis</button>
-                <button onclick="switchTab('archive')" id="tab-archive" class="tab-btn">📜 Archivo</button>
-                <button onclick="switchTab('patient')" id="tab-patient" class="tab-btn">🏥 Paciente</button>
-                <button onclick="switchTab('visual')" id="tab-visual" class="tab-btn text-indigo-400">🎬 Sim-Video</button>
+            <nav class="flex border-b border-white/10 mb-2 justify-around">
+                <button id="btn-lab" class="tab-btn active">🔬 LABORATORIO</button>
+                <button id="btn-report" class="tab-btn">📝 BITÁCORA</button>
+                <button id="btn-video" class="tab-btn text-indigo-400">🎬 VIDEO</button>
             </nav>
 
-            <div class="flex-1 overflow-y-auto space-y-5 pr-2 custom-scroll">
+            <div class="flex-1 overflow-y-auto space-y-4 pr-1">
                 
                 <div id="content-lab" class="space-y-4">
-                    <div class="bg-black/40 p-4 rounded-2xl border border-indigo-500/20">
-                        <label class="text-[9px] text-indigo-400 font-bold uppercase mb-2 block tracking-widest">Algoritmo de Predicción IA</label>
-                        <div class="flex gap-2">
-                            <input id="subInput" type="text" class="input-dark flex-1 p-3 rounded-xl" placeholder="Ingrese Compuesto + Patógeno objetivo...">
-                            <button onclick="runOmnisAnalysis()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 rounded-xl text-[10px] font-black uppercase tracking-tighter">Ejecutar</button>
-                        </div>
-                    </div>
-
-                    <div id="iaReport" class="hidden animate-in fade-in duration-500">
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <div class="bg-black/60 p-4 rounded-2xl border-t-2 border-green-500">
-                                <p class="text-[8px] text-slate-500 uppercase">Eficacia Teórica</p>
-                                <span id="effVal" class="text-3xl font-black text-white">0%</span>
-                            </div>
-                            <div class="bg-black/60 p-4 rounded-2xl border-t-2 border-red-500">
-                                <p class="text-[8px] text-slate-500 uppercase">Citotoxicidad</p>
-                                <span id="toxVal" class="text-3xl font-black text-red-500">0%</span>
-                            </div>
-                        </div>
-                        <div class="bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/20">
-                            <p class="text-[9px] font-bold text-indigo-400 mb-1">📝 RECOMENDACIÓN TÉCNICA:</p>
-                            <p id="recText" class="text-[11px] text-slate-300 leading-relaxed"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="content-archive" class="hidden space-y-4">
-                    <div class="bg-black/40 p-4 rounded-2xl">
-                        <p class="text-[9px] text-slate-500 mb-3 uppercase font-bold">Base de Datos Cronológica (1347 - 2026)</p>
-                        <select id="archiveSelect" onchange="loadArchiveData()" class="input-dark w-full p-3 rounded-xl mb-4">
-                            <option value="">-- SELECCIONAR AGENTE HISTÓRICO --</option>
-                            <optgroup label="AMENAZAS ANTIGUAS">
-                                <option value="pestis">1347 | Peste Negra (Y. Pestis)</option>
-                                <option value="variola">1520 | Viruela (Variola Virus)</option>
-                            </optgroup>
-                            <optgroup label="PANDEMIAS MODERNAS">
-                                <option value="flu1918">1918 | Gripe Española (H1N1)</option>
-                                <option value="hiv">1981 | VIH/SIDA (Retrovirus)</option>
-                                <option value="sars2">2019 | COVID-19 (SARS-CoV-2)</option>
-                            </optgroup>
-                            <optgroup label="AGENTES CRÍTICOS">
-                                <option value="ebola">2014 | Ébola (Filovirus)</option>
-                                <option value="marburg">2023 | Virus de Marburgo</option>
-                                <option value="h5n1">2026 | Gripe Aviar Altamente Patógena</option>
-                            </optgroup>
+                    <div class="p-4 bg-black/40 rounded-2xl border border-white/5">
+                        <p class="text-[9px] text-indigo-400 font-bold uppercase mb-3">Selección de Patógeno & Análisis</p>
+                        <select id="pathogenSelect" class="input-dark w-full p-3 rounded-xl mb-3">
+                            <option value="hiv">VIH-1 (Retrovirus)</option>
+                            <option value="ebola">Ébola (Filovirus)</option>
+                            <option value="sars2">SARS-CoV-2 (Corona)</option>
+                            <option value="h5n1">H5N1 (Gripe Aviar 2026)</option>
+                            <option value="sintetica">Bacteria Benéfica Sintética (X-1)</option>
                         </select>
-                        <div id="archiveDetails" class="text-[11px] space-y-3">
-                            <div class="p-4 bg-white/5 rounded-xl border border-white/5 italic text-slate-500 text-center">Seleccione un agente para desplegar historial y estructura PDB.</div>
+                        <input id="subInput" type="text" class="input-dark w-full p-3 rounded-xl mb-3" placeholder="Diseñar cura/agente...">
+                        <button id="runBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-[10px] font-black uppercase">Ejecutar Simulación</button>
+                    </div>
+
+                    <div id="stats" class="grid grid-cols-2 gap-2">
+                        <div class="p-3 bg-black/60 rounded-xl border-t-2 border-green-500 text-center">
+                            <p class="text-[8px] text-slate-500 uppercase">Eficacia</p>
+                            <span id="effVal" class="text-xl font-bold text-white">0%</span>
+                        </div>
+                        <div class="p-3 bg-black/60 rounded-xl border-t-2 border-red-500 text-center">
+                            <p class="text-[8px] text-slate-500 uppercase">Mortalidad</p>
+                            <span id="mortVal" class="text-xl font-bold text-red-500">0%</span>
                         </div>
                     </div>
                 </div>
 
-                <div id="content-patient" class="hidden space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-black/40 p-4 rounded-2xl">
-                            <p class="text-[8px] text-slate-500 mb-1 uppercase">Paciente Promedio</p>
-                            <p class="text-white font-bold text-xs">ID: Sentinel-08</p>
-                            <p class="text-slate-400 text-[10px]">Edad: 35a | Sexo: M | Peso: 75kg</p>
-                        </div>
-                        <div class="bg-black/40 p-4 rounded-2xl">
-                            <p class="text-[8px] text-slate-500 mb-1 uppercase">Ritmo Cardíaco</p>
-                            <p class="text-red-500 font-bold text-xs status-pulse">72 BPM</p>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 p-4 rounded-2xl space-y-4">
-                        <p class="text-[9px] font-bold text-indigo-400 uppercase">Impacto Sistémico de la Cura</p>
-                        <div>
-                            <div class="flex justify-between text-[9px] mb-1"><span>Toxicidad Hepática</span><span id="p-liver-text">0%</span></div>
-                            <div class="w-full bg-slate-900 h-1.5 rounded-full"><div id="p-liver-bar" class="bg-green-500 h-full transition-all duration-700" style="width: 0%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-[9px] mb-1"><span>Estrés Renal</span><span id="p-kidney-text">0%</span></div>
-                            <div class="w-full bg-slate-900 h-1.5 rounded-full"><div id="p-kidney-bar" class="bg-green-500 h-full transition-all duration-700" style="width: 0%"></div></div>
-                        </div>
+                <div id="content-report" class="hidden space-y-3">
+                    <div class="p-4 bg-black/40 rounded-2xl border border-white/5 h-full flex flex-col">
+                        <p class="text-[9px] text-indigo-400 font-bold uppercase mb-2">Redacción de Hallazgos y Observaciones</p>
+                        <textarea id="reportArea" class="input-dark w-full flex-1 p-4 rounded-xl resize-none h-64 mb-3" placeholder="Escriba aquí los detalles de la investigación, síntomas observados, o el comportamiento de la nueva bacteria..."></textarea>
+                        <button onclick="saveReport()" class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 py-2 rounded-xl text-[9px] font-bold uppercase">Guardar en Base de Datos</button>
                     </div>
                 </div>
 
-                <div id="content-visual" class="hidden space-y-4">
-                    <div class="bg-black rounded-2xl border border-indigo-500/30 overflow-hidden">
-                        <div class="p-3 bg-indigo-500/10 border-b border-indigo-500/20 flex justify-between items-center">
-                            <span class="text-[9px] font-bold text-indigo-400">MICROSCOPÍA VIRTUAL (PARTÍCULAS)</span>
-                            <span id="particleCount" class="text-[9px] text-slate-500">Partículas: 0</span>
-                        </div>
+                <div id="content-video" class="hidden space-y-3">
+                    <div class="bg-black p-4 rounded-2xl border border-indigo-500/20">
                         <canvas id="kineticCanvas"></canvas>
-                        <div class="p-4 grid grid-cols-3 gap-2">
-                            <button onclick="addParticle('pathogen')" class="bg-red-500/20 border border-red-500/30 text-red-500 p-2 rounded-lg text-[9px] font-bold hover:bg-red-500/40 transition-all uppercase">Inyectar Virus</button>
-                            <button onclick="addParticle('agent')" class="bg-blue-500/20 border border-blue-500/30 text-blue-400 p-2 rounded-lg text-[9px] font-bold hover:bg-blue-500/40 transition-all uppercase">Inyectar Cura</button>
-                            <button onclick="resetSim()" class="bg-slate-800 text-white p-2 rounded-lg text-[9px] font-bold uppercase">Limpiar</button>
+                        <div class="grid grid-cols-2 gap-2 mt-3">
+                            <button onclick="addParticle('pathogen')" class="bg-red-500/20 text-red-400 p-2 rounded-lg text-[9px] font-bold">+ Virus</button>
+                            <button onclick="addParticle('agent')" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-[9px] font-bold">+ Cura</button>
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            <div id="terminal" class="bg-black p-4 rounded-3xl h-28 text-[9px] font-mono text-indigo-400/70 overflow-y-auto border border-white/5">
-                > BioOS Master Init... OK<br>
-                > Secure Connection BSL-4... STABLE<br>
-                > Database Historical Access... GRANTED
+            <div id="terminal" class="bg-black/80 p-3 rounded-2xl h-24 text-[9px] font-mono text-indigo-400 overflow-y-auto border border-white/5">
+                > BioOS Inicializado correctamente.<br>
+                > BSL-4 Sentinel: Listo para operar.
             </div>
         </aside>
 
-        <main class="flex-1 glass rounded-[4rem] overflow-hidden relative border border-white/10">
+        <main class="flex-1 glass rounded-[3.5rem] overflow-hidden relative">
             <div id="viewer3d"></div>
-            <div class="absolute bottom-10 right-10 flex flex-col gap-2">
-                <div class="glass px-6 py-2 rounded-full border border-indigo-500/30 text-[10px] text-white font-bold flex items-center gap-2">
-                    <div class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div> ENGINE: OMNIS-3D
-                </div>
-                <div id="pdbDisplay" class="bg-black/60 px-6 py-2 rounded-full border border-white/10 text-[12px] text-indigo-300 font-black text-center">PDB: NONE</div>
+            <div class="absolute bottom-8 right-8 flex flex-col gap-2">
+                <div id="pdbLabel" class="bg-black/60 px-6 py-2 rounded-full border border-white/10 text-xs text-indigo-300 font-bold">PDB: 1SFO</div>
             </div>
         </main>
     </div>
 
     <script>
-        // --- DATA MASTER ---
-        const MASTER_DB = {
-            pestis: { name: "Peste Negra", pdb: "1Y7S", year: "1347", mort: "90%", info: "Bacteria Yersinia Pestis. Bloquea el sistema inmune mediante inyección de proteínas Yop.", rec: "Sensible a Estreptomicina. Requiere control de vectores." },
-            variola: { name: "Viruela", pdb: "2VVO", year: "1520", mort: "30%", info: "Variola Virus. Erradicado oficialmente en 1980. Alta contagiosidad.", rec: "Vacunación preventiva basada en virus Vaccinia." },
-            flu1918: { name: "Gripe Española", pdb: "1RU7", year: "1918", mort: "20%", info: "Cepa H1N1 de alta virulencia. Provoca tormenta de citoquinas severa.", rec: "Inhibidores de neuraminidasa y soporte ventilatorio." },
-            hiv: { name: "VIH-1", pdb: "1HHP", year: "1981", mort: "99%", info: "Retrovirus. Infecta linfocitos CD4+. Integra su ADN en el huésped.", rec: "Terapia antirretroviral (TAR) combinada. Bloqueo de Integrasa." },
-            sars2: { name: "SARS-CoV-2", pdb: "6VXX", year: "2019", mort: "2.5%", info: "Coronavirus de alta transmisión. Proteína Spike optimizada para ACE2.", rec: "Antivirales de nueva generación (Paxlovid) y vacunas ARNm." },
-            marburg: { name: "Virus de Marburgo", pdb: "7U0N", year: "2023", mort: "88%", info: "Filovirus similar al Ébola. Causa colapso sistémico y hemorragia.", rec: "Tratamiento experimental con Remdesivir y plasma convaleciente." },
-            h5n1: { name: "H5N1 Mutante", pdb: "2H5N", year: "2026", mort: "52%", info: "Gripe aviar con mutaciones de adaptación en mamíferos. Alerta actual.", rec: "Oseltamivir de alta dosis. Monitoreo de zoonosis activo." }
-        };
+        // --- MOTOR DE INTERFAZ (Eventos fijos) ---
+        const viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
 
-        // --- INTERFACE ENGINE ---
-        let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
+        document.getElementById('btn-lab').addEventListener('click', () => switchTab('lab'));
+        document.getElementById('btn-report').addEventListener('click', () => switchTab('report'));
+        document.getElementById('btn-video').addEventListener('click', () => switchTab('video'));
+        document.getElementById('runBtn').addEventListener('click', runSimulation);
 
         function switchTab(tabId) {
             document.querySelectorAll('[id^="content-"]').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('content-' + tabId).classList.remove('hidden');
-            document.getElementById('tab-' + tabId).classList.add('active');
-            if(tabId === 'visual') resizeCanvas();
+            document.getElementById('btn-' + tabId).classList.add('active');
+            if(tabId === 'video') resizeCanvas();
         }
 
-        // --- ANALYSIS ENGINE ---
-        function runOmnisAnalysis() {
-            const input = document.getElementById('subInput').value;
-            if(!input) return;
+        // --- LÓGICA MÉDICA ---
+        const pathogenData = {
+            hiv: { pdb: "1HHP", mort: "99%", eff: 45 },
+            ebola: { pdb: "4IBK", mort: "80%", eff: 30 },
+            sars2: { pdb: "6VXX", mort: "2%", eff: 80 },
+            h5n1: { pdb: "2H5N", mort: "52%", eff: 50 },
+            sintetica: { pdb: "6SBN", mort: "0%", eff: 95 }
+        };
+
+        function runSimulation() {
+            const pKey = document.getElementById('pathogenSelect').value;
+            const data = pathogenData[pKey];
             
-            document.getElementById('iaReport').classList.remove('hidden');
-            const eff = Math.floor(Math.random() * 45 + 50);
-            const tox = Math.floor((100 - eff) / 2);
-
-            document.getElementById('effVal').innerText = eff + "%";
-            document.getElementById('toxVal').innerText = tox + "%";
-            document.getElementById('recText').innerText = eff > 75 ? 
-                `Análisis positivo. El compuesto '${input}' presenta una afinidad electrónica óptima con los ligandos del patógeno. Se recomienda fase de testeo clínico.` :
-                `Advertencia. El compuesto '${input}' muestra una alta toxicidad hepática. Se requiere re-diseño molecular del enlace de hidrógeno.`;
-
-            // Update patient bars
-            document.getElementById('p-liver-bar').style.width = (tox + 10) + "%";
-            document.getElementById('p-liver-text').innerText = (tox + 10) + "%";
-            document.getElementById('p-kidney-bar').style.width = (tox - 5) + "%";
-            document.getElementById('p-kidney-text').innerText = (tox - 5) + "%";
+            document.getElementById('effVal').innerText = (data.eff + Math.floor(Math.random()*15)) + "%";
+            document.getElementById('mortVal').innerText = data.mort;
+            document.getElementById('pdbLabel').innerText = "PDB: " + data.pdb;
             
-            log(`Ejecutado análisis de espectrometría para: ${input}`);
+            renderStructure(data.pdb);
+            log(`Analizando ${pKey}... Estructura cargada.`);
         }
 
-        // --- ARCHIVE ENGINE ---
-        function loadArchiveData() {
-            const key = document.getElementById('archiveSelect').value;
-            if(!key) return;
-            const data = MASTER_DB[key];
-            document.getElementById('archiveDetails').innerHTML = `
-                <div class="bg-indigo-500/10 p-4 rounded-2xl border-l-4 border-indigo-500">
-                    <h3 class="text-white font-black text-sm uppercase">${data.name}</h3>
-                    <p class="text-[9px] text-indigo-400 mb-2">Año de Emergencia: ${data.year} | Letalidad: ${data.mort}</p>
-                    <p class="text-slate-300 mb-3">${data.info}</p>
-                    <div class="p-3 bg-black/40 rounded-xl border border-indigo-500/20">
-                        <p class="text-[8px] text-indigo-400 font-bold uppercase">Plan de Contención:</p>
-                        <p class="text-white text-[10px] italic">${data.rec}</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('pdbDisplay').innerText = "PDB: " + data.pdb;
-            render3D(data.pdb);
-            log(`Cargada estructura molecular de ${data.name} [${data.pdb}]`);
-        }
-
-        function render3D(pdbId) {
+        function renderStructure(pdbId) {
             viewer.clear();
             $3Dmol.download("pdb:" + pdbId, viewer, {}, function() {
-                viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: { radius: 0.2 } });
+                viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
                 viewer.zoomTo();
                 viewer.render();
             });
         }
 
-        // --- KINETIC VIDEO ENGINE ---
+        function saveReport() {
+            const text = document.getElementById('reportArea').value;
+            if(text) {
+                log("Reporte guardado en el archivo del sistema.");
+                alert("Redacción guardada con éxito.");
+            }
+        }
+
+        // --- MOTOR KINÉTICO (VIDEO) ---
         const canvas = document.getElementById('kineticCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
 
         function resizeCanvas() {
             canvas.width = canvas.offsetWidth;
-            canvas.height = 300;
+            canvas.height = 280;
         }
 
         class Particle {
@@ -265,49 +178,42 @@
                 this.type = type;
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 3;
-                this.vy = (Math.random() - 0.5) * 3;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
                 this.color = type === 'pathogen' ? '#ef4444' : '#6366f1';
-                this.radius = type === 'pathogen' ? 5 : 3;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = this.color;
-                ctx.fill();
             }
             update() {
                 this.x += this.vx; this.y += this.vy;
-                if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                if(this.x<0 || this.x>canvas.width) this.vx*=-1;
+                if(this.y<0 || this.y>canvas.height) this.vy*=-1;
+            }
+            draw() {
+                ctx.beginPath(); ctx.arc(this.x, this.y, 4, 0, Math.PI*2);
+                ctx.fillStyle = this.color; ctx.fill();
             }
         }
 
-        function addParticle(type) {
-            for(let i=0; i<15; i++) particles.push(new Particle(type));
-            document.getElementById('particleCount').innerText = "Partículas: " + particles.length;
-        }
-
-        function resetSim() { particles = []; document.getElementById('particleCount').innerText = "Partículas: 0"; }
-
+        function addParticle(type) { for(let i=0; i<15; i++) particles.push(new Particle(type)); }
         function animate() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // Trail effect
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+            ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.fillRect(0,0,canvas.width,canvas.height);
             particles.forEach((p, i) => {
                 p.update(); p.draw();
                 if(p.type === 'agent') {
                     particles.forEach((p2, j) => {
-                        if(p2.type === 'pathogen') {
-                            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                            if(dist < 10) {
-                                ctx.strokeStyle = 'white';
-                                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-                                particles.splice(j, 1);
-                            }
-                        }
+                        if(p2.type === 'pathogen' && Math.hypot(p.x-p2.x, p.y-p2.y) < 10) particles.splice(j, 1);
                     });
                 }
             });
+            requestAnimationFrame(animate);
+        }
+
+        function log(msg) {
+            const term = document.getElementById('terminal');
+            term.innerHTML += `> ${msg}<br>`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        window.onload = () => { resizeCanvas(); animate(); };
+    </script>
+</body>
+</html>
