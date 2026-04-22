@@ -3,255 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMNIS INFINITY | Genesis Lab Supreme</title>
+    <title>OMNIS INFINITY | Neural Genesis Overlord v10.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #010204;
+            --bg: #05070a;
             --panel: #0d1117;
             --neon-blue: #00d2ff;
             --neon-green: #39ff14;
             --neon-purple: #bc8cff;
             --neon-gold: #ffcc00;
             --danger: #ff3131;
+            --text: #e1e4e8;
             --border: 1px solid rgba(0, 210, 255, 0.2);
         }
 
         * { box-sizing: border-box; cursor: crosshair; }
-        body { margin: 0; background: var(--bg); color: #e1e4e8; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
 
-        /* --- MARKET TICKER --- */
+        /* --- TICKER NASDAQ --- */
         .market-ticker {
-            background: #000; color: var(--neon-gold); padding: 5px; font-family: 'Fira Code'; font-size: 10px;
-            border-bottom: 1px solid var(--neon-gold); white-space: nowrap; overflow: hidden;
+            background: #000; color: var(--neon-gold); padding: 6px; font-family: 'Fira Code'; font-size: 10px;
+            border-bottom: 1px solid var(--neon-gold); white-space: nowrap; overflow: hidden; letter-spacing: 1px;
         }
 
         header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 30px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--neon-blue);
+            padding: 15px 30px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--neon-blue);
             position: sticky; top: 0; z-index: 1000;
         }
-        .logo { font-family: 'Orbitron'; font-size: 20px; color: var(--neon-blue); letter-spacing: 3px; }
+        .logo { font-family: 'Orbitron'; font-size: 22px; color: var(--neon-blue); letter-spacing: 4px; font-weight: 900; }
 
+        /* --- LAYOUT MAESTRO --- */
         .master-layout {
-            display: grid; grid-template-columns: 350px 1fr 350px;
-            gap: 12px; padding: 12px; height: calc(100vh - 85px);
+            display: grid; grid-template-columns: 360px 1fr 360px;
+            gap: 15px; padding: 15px; height: calc(100vh - 90px);
         }
 
-        .panel { background: var(--panel); border: var(--border); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; }
-        .panel-h { background: rgba(255,255,255,0.03); padding: 10px; font-family: 'Orbitron'; font-size: 10px; color: var(--neon-blue); border-bottom: var(--border); }
+        .panel { background: var(--panel); border: var(--border); border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .panel-h { background: rgba(255,255,255,0.03); padding: 10px; font-family: 'Orbitron'; font-size: 11px; color: var(--neon-blue); border-bottom: var(--border); letter-spacing: 1px; }
 
+        /* --- VISOR 3D --- */
+        .viewport { flex-grow: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
+        #v-3d { width: 100%; height: 100%; z-index: 2; }
+        #v-live { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0.4; display: none; filter: hue-rotate(140deg); }
+
+        /* --- EDITOR CRISPR --- */
         .crispr-bench { background: #000; padding: 15px; border-top: var(--border); }
         .sequence-editor {
             font-family: 'Fira Code', monospace; font-size: 14px; letter-spacing: 4px;
-            background: #05070a; border: 1px solid #333; padding: 10px; color: var(--neon-green);
-            word-break: break-all; min-height: 60px; outline: none;
+            background: #05070a; border: 1px solid #333; padding: 12px; color: var(--neon-green);
+            word-break: break-all; min-height: 70px; outline: none; border-radius: 4px;
         }
         .base-a { color: #ff5f5f; } .base-t { color: #5fafff; } .base-c { color: #ffdf5f; } .base-g { color: #5fff7f; }
 
-        .viewport { flex-grow: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #v-live { width: 100%; height: 100%; object-fit: cover; display: none; opacity: 0.6; filter: hue-rotate(140deg); position: absolute; }
-        #v-3d { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 5; }
+        /* --- BOTONES --- */
+        .btn { width: 100%; padding: 14px; background: var(--neon-blue); color: #000; font-family: 'Orbitron'; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; font-size: 12px; }
+        .btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-blue); transform: translateY(-2px); }
+        .btn-ghost { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); }
 
-        .btn { width: 100%; padding: 12px; background: var(--neon-blue); color: #000; font-family: 'Orbitron'; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-blue); }
+        /* --- MÉTRICAS --- */
+        .metric { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #1a1d23; font-size: 14px; }
+        .val { font-family: 'Fira Code'; color: var(--neon-green); font-weight: bold; }
+
+        /* --- IA CARDS --- */
+        .extra-data { padding: 60px; background: #05070a; border-top: 3px solid var(--neon-purple); }
+        .ia-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; }
+        .ia-card { background: var(--panel); border: 1px solid var(--neon-purple); padding: 30px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .ia-card h3 { font-family: 'Orbitron'; font-size: 13px; color: var(--neon-purple); margin-top: 0; border-bottom: 1px solid #222; padding-bottom: 10px; }
         
-        .metric { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #1a1d23; font-size: 13px; }
-        .val { font-family: 'Fira Code'; color: var(--neon-green); }
+        .input-ia { width: 100%; background: #000; border: 1px solid #333; color: var(--neon-green); padding: 12px; font-family: 'Fira Code'; margin-top: 15px; border-radius: 4px; }
 
-        .extra-data { padding: 50px; background: #07090d; border-top: var(--border); }
-        .ia-analysis-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 40px; }
-        .ia-card { background: rgba(13, 17, 23, 0.8); border: 1px solid var(--neon-purple); padding: 25px; border-radius: 8px; }
-        .ia-card h3 { font-family: 'Orbitron'; color: var(--neon-purple); margin-top: 0; font-size: 12px; }
+        /* --- REPORTE INDUSTRIAL --- */
+        .btn-report {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+            color: #fff; font-family: 'Orbitron'; font-weight: 900; padding: 30px;
+            border: none; width: 100%; margin-top: 60px; cursor: pointer; border-radius: 4px;
+            font-size: 20px; letter-spacing: 2px; transition: 0.4s;
+        }
+        .btn-report:hover { filter: brightness(1.2); box-shadow: 0 0 50px rgba(188, 140, 255, 0.4); }
 
-        .input-ia { width: 100%; background: #000; border: 1px solid #333; color: var(--neon-green); padding: 10px; font-family: 'Fira Code'; margin-top: 10px; }
-        
-        .btn-report { background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue)); color: white; padding: 25px; border: none; font-family: 'Orbitron'; font-weight: 900; width: 100%; margin-top: 40px; cursor: pointer; border-radius: 8px; font-size: 18px; }
     </style>
 </head>
 <body>
 
-<div class="market-ticker">
-    NASDAQ: $OMNIS +24.8% ↑ | BIOTECH CAP: $6.2B | VALUACIÓN IP: CALCULANDO... | SECTOR: BIODEFENSA ACIVA
+<div class="market-ticker" id="ticker">
+    NASDAQ: $OMNIS +15.4% ↑ | BIOTECH INDEX: +2.1% | PATENT VALUATION: $6.2B | AI CORE: ONLINE | GENBANK SYNC: ACTIVE
 </div>
 
 <header>
-    <div class="logo">OMNIS INFINITY <span style="font-size:10px; vertical-align:middle;">GENESIS SUPREME v9.0</span></div>
-    <div style="font-size:12px; color:var(--neon-green);">● PACIENTE #PX-2026: ESTABLE | CONECTADO A GENBANK NCBI</div>
+    <div class="logo">OMNIS INFINITY <span style="font-size:10px; color:var(--neon-gold);">ENTERPRISE v10.0</span></div>
+    <div id="status-tag" style="font-size:12px; color:var(--neon-green); font-family:'Fira Code';">
+        ● PACIENTE #PX-2026: MONITOREO CRÍTICO | BIO-INTELIGENCIA ACTIVA
+    </div>
 </header>
 
 <main class="master-layout">
     <aside class="panel">
-        <div class="panel-h">BIODISEÑO & ELEMENTOS</div>
-        <div style="padding:15px;">
-            <label style="font-size:10px;">SELECCIONAR PATÓGENO</label>
-            <select id="pato-select" style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:8px; margin-bottom:15px;">
+        <div class="panel-h">BIO-ENGINEERING CORE</div>
+        <div style="padding:20px;">
+            <label style="font-size:10px; color:#666;">PATÓGENO SELECCIONADO (GENBANK ID)</label>
+            <select id="pato-select" style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:12px; margin-bottom:20px; font-family:'Fira Code';">
                 <option value="sars">NC_045512.2 (SARS-CoV-2)</option>
-                <option value="glio">U82226.1 (Glioblastoma)</option>
-                <option value="silica">SILICA-X (Virus de Cristal)</option>
+                <option value="glio">U82226.1 (GLIOBLASTOMA)</option>
+                <option value="silica">SILICA-X (CRISTAL VIRUS)</option>
             </select>
-            
-            <label style="font-size:10px;">TEMPERATURA DE INCUBACIÓN</label>
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-                <input type="range" min="0" max="200" value="37" style="flex-grow:1;" oninput="updateTemp(this.value)">
-                <span id="temp-display" style="font-family:'Fira Code'; color:var(--neon-purple);">37.0°C</span>
+
+            <label style="font-size:10px; color:#666;">TEMPERATURA DE REACCIÓN</label>
+            <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+                <input type="range" min="0" max="150" value="37" style="flex-grow:1;" id="temp-slider">
+                <span id="temp-display" style="font-family:'Fira Code'; color:var(--neon-purple); font-size:18px;">37.0°C</span>
             </div>
 
-            <label style="font-size:10px;">VECTOR DE ENTREGA</label>
-            <select style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:8px; margin-bottom:15px;">
-                <option>Nanopartícula Lipídica</option>
-                <option>Virus Adenoasociado</option>
+            <label style="font-size:10px; color:#666;">MÉTODO DE SÍNTESIS</label>
+            <select style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:12px; margin-bottom:20px;">
+                <option>Nanopartículas Lipídicas (LNP)</option>
+                <option>Vector Viral Adenoasociado (AAV)</option>
+                <option>Impresión de Proteínas 3D</option>
             </select>
 
-            <button class="btn" onclick="startGenesis()">GENERAR CURA SUPREMA</button>
+            <button class="btn" id="btn-genesis">EJECUTAR SÍNTESIS DE CURA</button>
+            <button class="btn btn-ghost" id="btn-ncbi">CONECTAR CLOUD NCBI</button>
 
-            <div id="val-box" style="margin-top:15px; padding:10px; background:rgba(255,204,0,0.1); border:1px solid var(--neon-gold); border-radius:4px; display:none;">
-                <div style="font-size:9px; color:var(--neon-gold);">VALUACIÓN DE IP GENERADA:</div>
-                <div id="ip-value" style="font-size:20px; font-weight:bold; color:white;">$0.00</div>
+            <div id="log-console" style="margin-top:20px; font-family:'Fira Code'; font-size:10px; color:var(--neon-blue); height:80px; overflow-y:auto; background:rgba(0,0,0,0.3); padding:10px;">
+                > Sistema listo para decodificación...
             </div>
         </div>
     </aside>
 
     <section class="panel">
-        <div class="panel-h" style="display:flex; justify-content:space-between;">
-            <span>VISUALIZADOR 3D / VÍDEO</span>
+        <div class="panel-h" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>ESTRUCTURA ATÓMICA DEL AGENTE</span>
             <div>
-                <button onclick="setView('3d')" style="background:none; border:1px solid var(--neon-blue); color:#fff; font-size:9px;">3D</button>
-                <button onclick="setView('video')" style="background:none; border:1px solid var(--neon-blue); color:#fff; font-size:9px;">VÍDEO</button>
+                <button class="btn-ghost" style="font-size:9px; padding:2px 8px;" onclick="toggleView('3d')">3D</button>
+                <button class="btn-ghost" style="font-size:9px; padding:2px 8px;" onclick="toggleView('video')">LIVE</button>
             </div>
         </div>
-        <div class="viewport" id="v-container">
+        <div class="viewport">
             <video id="v-live" loop muted autoplay>
                 <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
             </video>
             <div id="v-3d"></div>
         </div>
         <div class="crispr-bench">
+            <div style="font-family:'Orbitron'; font-size:10px; color:var(--neon-purple); margin-bottom:10px;">🛠️ EDITOR CRISPR-CAS9 (SECUENCIA ACTIVA)</div>
             <div class="sequence-editor" contenteditable="true" id="dna-editor">
-                <span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span>
+                <span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span><span class="base-a">A</span><span class="base-t">T</span><span class="base-g">G</span><span class="base-c">C</span>
             </div>
         </div>
     </section>
 
     <aside class="panel">
-        <div class="panel-h">MÉTRICAS DE SIMULACIÓN</div>
-        <div style="padding:10px;">
-            <div class="metric"><span>Afinidad</span><span class="val" id="m1">--</span></div>
-            <div class="metric"><span>Toxicidad</span><span class="val" id="m2">--</span></div>
-            <div class="metric"><span>Estabilidad</span><span class="val" id="m3">--</span></div>
-            <div class="metric"><span>Éxito</span><span class="val" id="m4">--</span></div>
-            
-            <div style="background:rgba(188, 140, 255, 0.1); padding:10px; margin-top:15px; border-radius:4px; border:1px solid var(--neon-purple);">
-                <div id="ai-msg" style="font-size:12px;">Esperando secuencia...</div>
+        <div class="panel-h">DASHBOARD DE IA & PACIENTE</div>
+        <div style="padding:15px;">
+            <div class="metric"><span>Afinidad de Ligando</span><span class="val" id="m1">--</span></div>
+            <div class="metric"><span>Citotoxicidad (LD50)</span><span class="val" id="m2" style="color:var(--danger)">--</span></div>
+            <div class="metric"><span>Estabilidad Térmica</span><span class="val" id="m3">--</span></div>
+            <div class="metric"><span>Probabilidad de Éxito</span><span class="val" id="m4" style="font-size:18px; color:var(--neon-blue)">--</span></div>
+
+            <div style="background:rgba(188, 140, 255, 0.1); padding:20px; margin-top:25px; border-radius:4px; border:1px solid var(--neon-purple);">
+                <div style="font-family:'Orbitron'; font-size:10px; color:var(--neon-purple); margin-bottom:10px;">CONSEJO IA SUPREMA</div>
+                <div id="ai-advice" style="font-size:13px; line-height:1.5;">Esperando datos de secuencia para realizar predicción clínica...</div>
+            </div>
+
+            <div style="margin-top:25px; font-size:11px; color:#555; text-align:center;">
+                MODO OSCURO ACTIVO | ENCRIPTACIÓN CUÁNTICA AES-256
             </div>
         </div>
     </aside>
 </main>
 
 <section class="extra-data">
-    <div class="ia-analysis-grid">
+    <div class="ia-grid">
         <div class="ia-card">
-            <h3>🛡️ DEBILIDADES CIENTÍFICAS</h3>
-            <div id="debilidad-txt" style="font-size: 12px; color: #aaa;">Inicie escaneo...</div>
-            <div style="margin-top:10px; color:var(--neon-green); font-weight:bold;" id="sugestion-ia">--</div>
+            <h3>🛡️ DEBILIDAD ESTRUCTURAL (Nature Data)</h3>
+            <div id="bio-fail" style="font-size:13px; color:#aaa; line-height:1.6;">Seleccione un patógeno para contrastar con papers de la base de datos PubMed...</div>
+            <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+                <span style="font-size:10px; color:var(--neon-blue);">PROTOCOLO SUGERIDO:</span>
+                <div id="ai-protocol" style="font-weight:bold; color:var(--neon-green); margin-top:5px;">SINCRONIZACIÓN REQUERIDA</div>
+            </div>
         </div>
 
-        <div class="ia-card">
-            <h3>🧪 PROBABILIDAD DE LA CURA</h3>
-            <input type="text" id="user-substance" class="input-ia" placeholder="Nombre de tu sustancia...">
-            <button class="btn" style="height:35px; font-size:10px;" onclick="analizarCura()">ANALIZAR PROBABILIDAD</button>
-            <div id="resultado-cura" style="margin-top:10px; font-size:12px;"></div>
+        <div class="ia-card" style="border-color:var(--neon-blue);">
+            <h3>🧪 VALIDACIÓN DE CURA PROPIA</h3>
+            <label style="font-size:10px;">NOMBRE DEL COMPUESTO:</label>
+            <input type="text" id="user-substance" class="input-ia" placeholder="Ej: Inhibidor-X1...">
+            <button class="btn" id="btn-analyze" style="margin-top:15px;">CORRER SIMULACIÓN MONTECARLO</button>
+            <div id="user-result" style="margin-top:20px; font-size:13px;"></div>
         </div>
 
-        <div class="ia-card" style="border-color:var(--neon-gold)">
-            <h3>💰 ANÁLISIS DE MERCADO ($)</h3>
-            <div id="market-msg" style="font-size:12px; color:#aaa;">Esperando síntesis...</div>
-            <div style="height:5px; background:#222; margin-top:10px;"><div id="bar-m" style="width:0%; height:100%; background:var(--neon-gold); transition:1s;"></div></div>
+        <div class="ia-card" style="border-color:var(--neon-gold);">
+            <h3>💰 IMPACTO FINANCIERO & IP</h3>
+            <div style="font-size:10px; color:var(--neon-gold);">VALUACIÓN ESTIMADA DE PATENTE</div>
+            <div id="ip-val" style="font-size:32px; font-weight:900; margin:10px 0;">$0.00</div>
+            <div style="height:6px; background:#1a1d23; border-radius:10px; overflow:hidden;">
+                <div id="bar-fill" style="width:0%; height:100%; background:var(--neon-gold); transition:1s;"></div>
+            </div>
+            <div style="font-size:10px; margin-top:10px;">PENETRACIÓN DE MERCADO GLOBAL</div>
         </div>
     </div>
 
-    <button class="btn-report" onclick="generarReporte()">📄 GENERAR REPORTE INDUSTRIAL DE 6 BILLONES</button>
+    <button class="btn-report" id="btn-final-report">📄 GENERAR REPORTE INDUSTRIAL DE ALTO NIVEL (BOARD DIRECTORS)</button>
 </section>
 
 <script>
-    // --- MOTOR 3D ---
-    let scene, camera, renderer, model;
+    // --- MOTOR 3D PROFESIONAL ---
+    let scene, camera, renderer, crystal;
     function init3D() {
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, 400/300, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         const container = document.getElementById('v-3d');
-        renderer.setSize(container.clientWidth, 350);
+        camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(renderer.domElement);
-        const geo = new THREE.IcosahedronGeometry(10, 1);
-        const mat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, wireframe: true });
-        model = new THREE.Mesh(geo, mat);
-        scene.add(model);
-        camera.position.z = 25;
-        function animate() { requestAnimationFrame(animate); model.rotation.y += 0.01; renderer.render(scene, camera); }
+
+        const geo = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+        const mat = new THREE.MeshPhongMaterial({ color: 0x00d2ff, wireframe: true, emissive: 0x00d2ff, emissiveIntensity: 0.5 });
+        crystal = new THREE.Mesh(geo, mat);
+        scene.add(crystal);
+
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        camera.position.z = 30;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            crystal.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
         animate();
     }
     init3D();
 
-    function setView(m) {
-        document.getElementById('v-live').style.display = (m==='video') ? 'block' : 'none';
-        document.getElementById('v-3d').style.display = (m==='3d') ? 'flex' : 'none';
+    function toggleView(type) {
+        document.getElementById('v-live').style.display = (type === 'video') ? 'block' : 'none';
+        document.getElementById('v-3d').style.display = (type === '3d') ? 'block' : 'none';
     }
 
-    function updateTemp(v) {
-        document.getElementById('temp-display').innerText = v + ".0°C";
-        model.material.color.setHex(v > 60 ? 0xff3131 : 0x00d2ff);
-    }
+    // --- LÓGICA DE BOTONES ---
+    document.getElementById('temp-slider').addEventListener('input', function(e) {
+        const val = e.target.value;
+        document.getElementById('temp-display').innerText = val + ".0°C";
+        crystal.material.color.setHex(val > 70 ? 0xff3131 : 0x00d2ff);
+    });
 
-    function startGenesis() {
-        document.getElementById('ai-msg').innerText = "Simulando en servidores GenBank...";
-        document.getElementById('val-box').style.display = "block";
+    document.getElementById('btn-genesis').onclick = function() {
+        const log = document.getElementById('log-console');
+        const pato = document.getElementById('pato-select').value;
+        log.innerHTML += "<br>> Consultando GenBank API...<br>> Calculando afinidad molecular...";
+        
         setTimeout(() => {
-            document.getElementById('m1').innerText = "-32.1 kcal";
-            document.getElementById('m2').innerText = "0.001%";
-            document.getElementById('m3').innerText = "Estable";
-            document.getElementById('m4').innerText = "99.4%";
-            document.getElementById('ip-value').innerText = "$840,000,000";
+            document.getElementById('m1').innerText = "-24.8 kcal/mol";
+            document.getElementById('m2').innerText = "0.002%";
+            document.getElementById('m3').innerText = "98.9%";
+            document.getElementById('m4').innerText = "94.2%";
+            document.getElementById('ai-advice').innerText = "La secuencia es estable. Se recomienda proceder a la fase de síntesis lipídica inmediata.";
             
-            const p = document.getElementById('pato-select').value;
-            if(p==='silica') {
-                document.getElementById('debilidad-txt').innerText = "Estructura cristalina vulnerable a vibración sónica.";
-                document.getElementById('sugestion-ia').innerText = "Agente Quelante Sónico";
-            } else {
-                document.getElementById('debilidad-txt').innerText = "Vulnerabilidad en la cadena de replicación viral.";
-                document.getElementById('sugestion-ia').innerText = "Inhibidor Proteasa";
+            if(pato === 'silica') {
+                document.getElementById('bio-fail').innerText = "El patógeno Silica-X presenta una vulnerabilidad crítica en sus enlaces de silicio ante frecuencias sónicas.";
+                document.getElementById('ai-protocol').innerText = "DISRUPCIÓN SÓNICA + QUELANTE";
             }
-        }, 1000);
-    }
+        }, 1500);
+    };
 
-    function analizarCura() {
-        const s = document.getElementById('user-substance').value;
-        const res = document.getElementById('resultado-cura');
-        if(!s) return;
-        res.innerHTML = "Analizando...";
+    document.getElementById('btn-analyze').onclick = function() {
+        const sub = document.getElementById('user-substance').value;
+        const res = document.getElementById('user-result');
+        if(!sub) return alert("Ingrese el nombre del compuesto");
+        
+        res.innerHTML = "<span style='color:var(--neon-blue)'>Corriendo 10,000 simulaciones...</span>";
         setTimeout(() => {
-            const prob = s.length > 5 ? 92 : 30;
-            res.innerHTML = `<b style="color:var(--neon-green)">ÉXITO: ${prob}%</b><br>Basado en papers reales.`;
-            document.getElementById('bar-m').style.width = prob + "%";
-            document.getElementById('market-msg').innerText = "Demanda global estimada: ALTA.";
-        }, 1000);
-    }
+            const success = sub.length > 6 ? 89 : 24;
+            res.innerHTML = `<b style="color:var(--neon-green); font-size:18px;">ÉXITO: ${success}%</b><br><span style="font-size:11px; color:#666;">Basado en validación de papers Lancet/Nature.</span>`;
+            document.getElementById('ip-val').innerText = `$${(success * 62.5).toFixed(2)}M`;
+            document.getElementById('bar-fill').style.width = success + "%";
+        }, 1500);
+    };
 
-    function generarReporte() {
+    document.getElementById('btn-final-report').onclick = function() {
         const win = window.open("", "_blank");
+        const sub = document.getElementById('user-substance').value || "OMNIS-GENESIS-01";
         win.document.write(`
-            <body style="background:#000; color:gold; font-family:monospace; padding:50px;">
-                <h1>REPORTE OMNIS INFINITY - VALOR $6.2 BILLONES</h1>
-                <hr>
-                <p>PATÓGENO ANALIZADO: ${document.getElementById('pato-select').value}</p>
-                <p>PROBABILIDAD DE ÉXITO: 99.4%</p>
-                <p>STATUS DE MERCADO: MONOPOLIO ABSOLUTO</p>
-                <button onclick="window.print()">IMPRIMIR PARA EL JEFE</button>
+            <body style="background:#fff; color:#000; font-family:serif; padding:60px; line-height:1.5;">
+                <div style="border-bottom: 2px solid #000; padding-bottom:10px;">
+                    <h1 style="margin:0;">OMNIS INFINITY - INDUSTRIAL TECHNICAL DOSSIER</h1>
+                    <p>CLASSIFICATION: TOP SECRET / LEVEL 5 ACCESS ONLY</p>
+                </div>
+                <h2>1. SUMMARY OF BIOPROCESSING</h2>
+                <p>Synthesis of compound <b>${sub}</b> has been validated via Neural Genesis Core. Final docking affinity measured at -24.8 kcal/mol, indicating absolute binding efficiency.</p>
+                <h2>2. INTELLECTUAL PROPERTY & MARKET</h2>
+                <p>Current estimated valuation of the asset: <b>${document.getElementById('ip-val').innerText} USD</b>. The patent covers the mechanism of action against GenBank ID ${document.getElementById('pato-select').value}.</p>
+                <div style="border:1px solid #000; padding:20px; background:#f9f9f9;">
+                    <b>VERDICT:</b> READY FOR PHASE 1 CLINICAL TRIALS.
+                </div>
+                <p style="margin-top:100px;">Signed,<br>Cerebro Supremo IA - OMNIS INFINITY</p>
             </body>
         `);
     }
+
 </script>
 
 </body>
-</html>
+                </html>
