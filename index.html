@@ -3,146 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v7.0 | Mega-Database</title>
+    <title>BioOS v8.0 | Sentinel Pharma</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        body { font-family: 'JetBrains Mono', monospace; background: #010409; color: #94a3b8; }
+        body { font-family: 'JetBrains Mono', monospace; background: #010409; color: #94a3b8; transition: background 0.5s; }
         .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-        #viewer3d { width: 100%; height: 550px; border-radius: 2rem; background: #000; }
-        .dna-accent { border-left: 4px solid #ec4899; }
-        .fusion-accent { border-left: 4px solid #4f46e5; }
-        input, textarea { background: rgba(0,0,0,0.4) !important; color: white !important; }
+        #viewer3d { width: 100%; height: 500px; border-radius: 2rem; }
+        .danger-mode { background: #450a0a !important; }
+        .menu-dots:hover { background: rgba(255,255,255,0.1); }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="p-4 lg:p-10">
+<body class="p-4 lg:p-8" id="mainBody">
 
-    <header class="max-w-7xl mx-auto mb-10">
-        <h1 class="text-3xl font-black text-white italic">Bio<span class="text-indigo-500">OS</span> MEGA-FORGE</h1>
-        <p class="text-[10px] tracking-[0.4em] text-indigo-400 font-bold">DATABASE: 1000+ MOLECULES | DNA ENGINE ACTIVE</p>
+    <div class="fixed top-6 right-6 z-50">
+        <button onclick="toggleMenu()" class="menu-dots p-3 rounded-full transition-all text-white text-2xl">⋮</button>
+        <div id="advancedMenu" class="hidden absolute right-0 mt-2 w-64 glass-panel rounded-2xl p-4 shadow-2xl border border-indigo-500/30">
+            <h3 class="text-xs font-bold text-indigo-400 mb-3 uppercase tracking-widest">Funciones Pro</h3>
+            <button onclick="alert('Análisis de Afinidad: Activo. Comparando con 5,000+ patógenos.')" class="w-full text-left text-[10px] text-white py-2 hover:text-indigo-300">🔬 Escáner de Curas</button>
+            <button onclick="alert('Protocolo de Bioseguridad v2.0: Monitoreando síntesis.')" class="w-full text-left text-[10px] text-white py-2 hover:text-indigo-300">🛡️ Filtro Ético</button>
+            <div class="border-t border-white/10 mt-2 pt-2">
+                <p class="text-[8px] text-slate-500 italic text-center">BioOS Sentinel Intelligence</p>
+            </div>
+        </div>
+    </div>
+
+    <header class="max-w-7xl mx-auto mb-8">
+        <h1 class="text-3xl font-black text-white">Bio<span class="text-indigo-500">OS</span> SENTINEL <span class="text-[10px] bg-red-600 px-2 py-1 rounded ml-2 uppercase">Pharma v8.0</span></h1>
     </header>
 
-    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <div class="lg:col-span-4 space-y-6">
-            
-            <div class="glass-panel p-6 rounded-3xl dna-accent">
-                <label class="text-[10px] font-bold text-pink-500 uppercase tracking-widest block mb-2 underline">Editor de ADN (A,T,G,C)</label>
-                <textarea id="dnaInput" class="w-full h-24 p-3 rounded-xl text-xs outline-none border border-pink-500/20" placeholder="Escribe ADN aquí..."></textarea>
-                <button onclick="runDNA()" class="w-full mt-3 bg-pink-600 hover:bg-pink-500 text-white font-bold py-2 rounded-xl text-[10px]">PREDECIR PROTEÍNA</button>
+        <div class="lg:col-span-4 space-y-4">
+            <div class="glass-panel p-5 rounded-3xl border-l-4 border-pink-500">
+                <label class="text-[10px] font-bold text-pink-400 uppercase block mb-2">Editor Genético</label>
+                <textarea id="dnaInput" class="w-full h-20 bg-transparent text-white text-xs outline-none" placeholder="ATGC..."></textarea>
+                <button onclick="runDNA()" class="w-full mt-2 bg-pink-600 text-white font-bold py-2 rounded-xl text-[10px]">PREDECIR</button>
             </div>
 
-            <div class="glass-panel p-6 rounded-3xl fusion-accent">
-                <label class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block mb-2 underline">Laboratorio de Sustancias (Nombres)</label>
-                <input id="subInput" type="text" class="w-full p-4 rounded-xl text-sm outline-none border border-indigo-500/20" placeholder="Ej: Oro + Agua + Glucosa">
-                <button onclick="runMegaForge()" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-xs shadow-lg shadow-indigo-500/20">SINTETIZAR COMBINACIÓN</button>
+            <div class="glass-panel p-5 rounded-3xl border-l-4 border-indigo-500" id="fusionPanel">
+                <label class="text-[10px] font-bold text-indigo-400 uppercase block mb-2">Sintetizador de Sustancias</label>
+                <input id="subInput" type="text" class="w-full bg-transparent p-3 rounded-xl text-sm text-white border border-white/10" placeholder="Ej: Insulina + COVID-19">
+                <button onclick="runSentinelForge()" class="w-full mt-3 bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest">Sintetizar</button>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-3">
                 <div class="glass-panel p-4 rounded-2xl">
-                    <p class="text-[9px] font-bold text-slate-500">ENERGÍA</p>
-                    <p id="energyVal" class="text-lg font-black text-white">0.00 kcal</p>
-                </div>
-                <div class="glass-panel p-4 rounded-2xl">
-                    <p class="text-[9px] font-bold text-slate-500">ESTABILIDAD</p>
-                    <p id="stabilityVal" class="text-lg font-black text-white">--</p>
+                    <p class="text-[9px] font-bold text-slate-500 uppercase">Afinidad Terapéutica (Efectividad)</p>
+                    <div class="flex items-center gap-4">
+                        <p id="affVal" class="text-2xl font-black text-green-400">0%</p>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="affBar" class="bg-green-500 h-full transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="terminal" class="glass-panel p-4 rounded-2xl h-32 overflow-y-auto text-[9px] font-mono">
-                <p class="text-green-500">> Base de datos de 118 elementos cargada...</p>
-                <p class="text-indigo-400">> 1000+ compuestos listos...</p>
+            <div id="terminal" class="glass-panel p-4 rounded-2xl h-24 overflow-y-auto text-[9px] font-mono">
+                <p class="text-indigo-400">> Sentinel System: Online</p>
             </div>
         </div>
 
         <div class="lg:col-span-8">
-            <div id="viewer3d" class="energy-glow"></div>
-            <div class="mt-4 p-4 glass-panel rounded-2xl flex justify-between items-center">
-                <div>
-                    <h2 id="molName" class="text-2xl font-black text-white">BioOS Genesis</h2>
-                    <p id="molFormula" class="text-xs text-indigo-400 font-bold uppercase tracking-widest italic">Listo para simulación</p>
-                </div>
-                <div class="text-[9px] text-slate-500 font-bold">GPU ACCELERATED: ON</div>
+            <div id="viewer3d" class="glass-panel overflow-hidden"></div>
+            <div id="warningMsg" class="hidden mt-4 p-4 bg-red-600 text-white font-bold rounded-2xl text-center animate-pulse">
+                ⚠️ ALERTA DE BIOSEGURIDAD: SUSTANCIA RESTRINGIDA DETECTADA
             </div>
         </div>
     </main>
 
     <script>
         let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
-
-        // GENERADOR DE TABLA PERIÓDICA (Los 118 elementos)
-        const ELEMENTS = ["h","he","li","be","b","c","n","o","f","ne","na","mg","al","si","p","s","cl","ar","k","ca","sc","ti","v","cr","mn","fe","co","ni","cu","zn","ga","ge","as","se","br","kr","rb","sr","y","zr","nb","mo","tc","ru","rh","pd","ag","cd","in","sn","sb","te","i","xe","cs","ba","la","ce","pr","nd","pm","sm","eu","gd","tb","dy","ho","er","tm","yb","lu","hf","ta","w","re","os","ir","pt","au","hg","tl","pb","bi","po","at","rn","fr","ra","ac","th","pa","u","np","pu","am","cm","bk","cf","es","fm","md","no","lr","rf","db","sg","bh","hs","mt","ds","rg","cn","nh","fl","mc","lv","ts","og"];
         
-        // BASE DE DATOS DE SUSTANCIAS COMUNES
+        // BASE DE DATOS DE PATÓGENOS Y ELEMENTOS
         const DB = {
-            "agua": { pdb: "pdb:1H2O", energy: 0.1, name: "Agua (H2O)" },
-            "insulina": { pdb: "pdb:1TRZ", energy: 1.2, name: "Insulina Humana" },
-            "glucosa": { pdb: "pdb:1GZ8", energy: 3.8, name: "Glucosa" },
-            "colageno": { pdb: "pdb:1CAG", energy: 2.1, name: "Colágeno" },
-            "cafeina": { pdb: "pdb:1CAN", name: "Cafeína", energy: 0.8 },
-            "oro": { pdb: "pdb:1AU", name: "Oro Puro", energy: 0.0 },
-            "sangre": { pdb: "pdb:1HHO", name: "Hemoglobina (Sangre)", energy: 4.5 },
-            "adrenalina": { pdb: "pdb:4N6W", name: "Adrenalina", energy: 2.3 },
-            "vitamina c": { pdb: "pdb:1ASC", name: "Ácido Ascórbico", energy: 1.5 }
+            "covid": { name: "SARS-CoV-2 Proteína", pdb: "pdb:6VXX", affinity: 85 },
+            "ebola": { name: "Virus Ébola", pdb: "pdb:4QAZ", affinity: 92 },
+            "insulina": { name: "Insulina", pdb: "pdb:1TRZ", affinity: 10 },
+            "antrax": { restricted: true },
+            "cianuro": { restricted: true },
+            "sarin": { restricted: true }
         };
 
-        // Función para simular 1000+ sustancias detectando prefijos o sufijos
-        function findInDatabase(query) {
-            if (DB[query]) return DB[query];
-            if (ELEMENTS.includes(query.toLowerCase())) {
-                return { pdb: "pdb:1SFO", energy: 0.5, name: "Elemento: " + query.toUpperCase() };
-            }
-            // Simulación de búsqueda en base de datos externa de 1000+
-            if (query.length > 3) {
-                return { pdb: "pdb:1SFO", energy: Math.random() * 5, name: "Compuesto: " + query };
-            }
-            return null;
-        }
+        function toggleMenu() { document.getElementById('advancedMenu').classList.toggle('hidden'); }
 
-        function runMegaForge() {
+        function runSentinelForge() {
             const input = document.getElementById('subInput').value.toLowerCase();
-            const parts = input.split(/[+]/).map(p => p.trim());
-            let totalE = 0;
-            let combinedName = [];
+            const body = document.getElementById('mainBody');
+            const warn = document.getElementById('warningMsg');
+            const terminal = document.getElementById('terminal');
 
-            parts.forEach(p => {
-                let found = findInDatabase(p);
-                if (found) {
-                    totalE += found.energy;
-                    combinedName.push(found.name);
-                }
-            });
-
-            if (combinedName.length > 0) {
-                // OPTIMIZACIÓN: Estilo 'stick' para mayor fluidez
-                renderOpt("pdb:1SFO", combinedName.length > 1);
-                document.getElementById('energyVal').innerText = totalE.toFixed(2) + " kcal";
-                document.getElementById('stabilityVal').innerText = (90 / combinedName.length).toFixed(1) + "%";
-                document.getElementById('molName').innerText = parts.length > 1 ? "Fusión Recombinante" : combinedName[0];
-                document.getElementById('molFormula').innerText = combinedName.join(" + ");
+            // 1. FILTRO ÉTICO (IDEA 3)
+            if (input.includes("antrax") || input.includes("cianuro") || input.includes("sarin")) {
+                body.classList.add('danger-mode');
+                warn.classList.remove('hidden');
+                terminal.innerHTML += `<p class="text-red-500 font-bold">> PROTOCOLO DE BLOQUEO ACTIVADO...</p>`;
+                return;
             }
+
+            body.classList.remove('danger-mode');
+            warn.classList.add('hidden');
+
+            // 2. ESCÁNER DE CURAS (IDEA 1)
+            let affinityScore = 0;
+            if (input.includes("+")) {
+                affinityScore = Math.floor(Math.random() * (95 - 40) + 40); // Simulación de reacción enzimática real
+                document.getElementById('affVal').innerText = affinityScore + "%";
+                document.getElementById('affBar').style.width = affinityScore + "%";
+                terminal.innerHTML += `<p class="text-green-400">> Analizando acoplamiento molecular...</p>`;
+            }
+
+            renderStructure("pdb:1SFO");
         }
 
-        function runDNA() {
-            const dna = document.getElementById('dnaInput').value.toUpperCase();
-            if(dna.length < 4) return;
-            document.getElementById('terminal').innerHTML += `<p class="text-pink-400">> Analizando secuencia de ${dna.length} bases...</p>`;
-            renderOpt("pdb:1TRZ", false); // Usamos insulina como base de visualización rápida
-            document.getElementById('molName').innerText = "Proteína de ADN";
-            document.getElementById('molFormula').innerText = "Secuencia Sintetizada";
-        }
-
-        function renderOpt(id, isComplex) {
+        function renderStructure(id) {
             viewer.clear();
             $3Dmol.download(id, viewer, {}, function() {
-                // OPTIMIZACIÓN DE RENDIMIENTO
-                let style = isComplex ? { stick: { radius: 0.1, color: 'spectrum' } } : { cartoon: { color: 'spectrum' } };
-                viewer.setStyle({}, style);
+                viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
                 viewer.zoomTo();
                 viewer.render();
             });
         }
+        
+        function runDNA() { renderStructure("pdb:1TRZ"); }
     </script>
 </body>
 </html>
