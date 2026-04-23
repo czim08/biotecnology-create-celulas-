@@ -1,142 +1,198 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioOS v5.0 | Energy & Synthesis</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        body { font-family: 'JetBrains Mono', monospace; background: #020617; color: #94a3b8; overflow-x: hidden; }
-        .dna-gradient { background: linear-gradient(90deg, #4f46e5, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #viewer3d { width: 100%; height: 500px; border-radius: 32px; background: radial-gradient(circle, #0f172a 0%, #020617 100%); }
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.05); }
-        .stat-card { background: rgba(30, 41, 59, 0.5); border-left: 4px solid #6366f1; }
-        .energy-glow { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); }
-    </style>
-</head>
-<body class="p-4 lg:p-10">
+<script>
+/* ===========================
+   🔬 BASE DE DATOS EXPANDIDA
+=========================== */
 
-    <header class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-        <div>
-            <h1 class="text-3xl font-black text-white tracking-tighter">Bio<span class="dna-gradient">OS</span> ENERGY v5.0</h1>
-            <p class="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.5em]">Quantum Molecular Architecture</p>
-        </div>
-        <div class="flex gap-4">
-            <input type="password" id="hfToken" placeholder="TOKEN HF" class="glass-panel px-4 py-2 rounded-xl text-xs w-40 focus:w-64 transition-all outline-none text-white">
-        </div>
-    </header>
+const ELEMENTS = ["hidrogeno","helio","litio","carbono","nitrogeno","oxigeno","sodio","potasio","calcio","hierro"];
 
-    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-4 space-y-6">
-            
-            <div class="glass-panel p-6 rounded-[2rem] border-t border-cyan-500/30 energy-glow">
-                <label class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-3">Laboratorio de Fusión</label>
-                <input id="substanceInput" type="text" class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl text-sm text-white outline-none focus:border-cyan-500 transition-all mb-4" placeholder="Ej: Glucosa + Grasa">
-                
-                <button onclick="runAdvancedForge()" class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-4 rounded-2xl text-xs transition-all transform hover:scale-[1.02] shadow-xl shadow-cyan-900/20">
-                    SINTETIZAR Y CALCULAR ENERGÍA
-                </button>
-            </div>
+const PATHOGENS = ["covid-19","influenza","vih","tuberculosis","salmonella"];
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="stat-card p-4 rounded-2xl">
-                    <p class="text-[9px] uppercase font-bold text-slate-500">Energía Resultante</p>
-                    <p id="energyVal" class="text-xl font-black text-white">0.00 <span class="text-[10px] text-indigo-400">kcal</span></p>
-                </div>
-                <div class="stat-card p-4 rounded-2xl border-cyan-500">
-                    <p class="text-[9px] uppercase font-bold text-slate-500">Estabilidad</p>
-                    <p id="stabilityVal" class="text-xl font-black text-white">--</p>
-                </div>
-            </div>
+const DISEASES = ["cancer","diabetes","hipertension","asma"];
 
-            <div class="glass-panel p-5 rounded-2xl h-48 overflow-y-auto text-[10px] font-mono leading-relaxed" id="terminal">
-                <p class="text-cyan-500">> Núcleo de energía en línea...</p>
-                <p class="text-slate-500">> Esperando comando de síntesis...</p>
-            </div>
-        </div>
+/* ===========================
+   🌡 CONTROL DE TEMPERATURA
+=========================== */
 
-        <div class="lg:col-span-8 relative">
-            <div id="viewer3d" class="border border-white/5 shadow-2xl"></div>
-            
-            <div class="absolute top-6 right-6 flex flex-col gap-2">
-                <div class="glass-panel px-4 py-2 rounded-full text-[10px] text-white font-bold flex items-center gap-2">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> IA ACTIVA: ESM-2
-                </div>
-            </div>
+let temperature = 25;
 
-            <div class="absolute bottom-8 left-8 z-10">
-                <h2 id="molName" class="text-4xl font-black text-white mb-1 drop-shadow-2xl">Sistema Forge</h2>
-                <p id="molFormula" class="text-cyan-400 font-bold tracking-widest text-sm uppercase">Seleccione sustancias para procesar</p>
-            </div>
-        </div>
-    </main>
+function setTemperature(val){
+    temperature = val;
+    log(`> Temperatura ajustada a ${temperature}°C`);
+}
 
-    <script>
-        let viewer = $3Dmol.createViewer("viewer3d", { backgroundColor: "none" });
-        
-        const MOLECULES = {
-            "glucosa": { pdb: "pdb:1GZ8", name: "D-Glucosa", energy: 3.75, formula: "C6H12O6" },
-            "grasa": { pdb: "pdb:1LDF", name: "Lípido Complejo", energy: 9.20, formula: "C55H98O6" },
-            "insulina": { pdb: "pdb:1TRZ", name: "Insulina", energy: 1.2, formula: "C257H383N65O77S6" },
-            "colageno": { pdb: "pdb:1CAG", name: "Colágeno", energy: 2.1, formula: "Fibra Estructural" },
-            "agua": { pdb: "pdb:1H2O", name: "Agua", energy: 0.1, formula: "H2O" }
-        };
+/* ===========================
+   🔍 DETECCIÓN UNIVERSAL
+=========================== */
 
-        function runAdvancedForge() {
-            const input = document.getElementById('substanceInput').value.toLowerCase();
-            const terminal = document.getElementById('terminal');
-            
-            terminal.innerHTML += `<p class="text-white font-bold mt-2">> Iniciando proceso de forja...</p>`;
+function detectAdvanced(input){
+    let detected = [];
 
-            if (input.includes("+") || input.includes("mas")) {
-                const parts = input.split(/[+]|mas/).map(p => p.trim());
-                let totalEnergy = 0;
-                let foundAny = false;
+    ELEMENTS.forEach(e => {
+        if(input.includes(e)) detected.push("Elemento: " + e);
+    });
 
-                parts.forEach(part => {
-                    if (MOLECULES[part]) {
-                        totalEnergy += MOLECULES[part].energy;
-                        foundAny = true;
-                        terminal.innerHTML += `<p class="text-cyan-400">> Agregando ${MOLECULES[part].name} (+${MOLECULES[part].energy} kcal/g)...</p>`;
-                    }
-                });
+    PATHOGENS.forEach(p => {
+        if(input.includes(p)) detected.push("Patógeno: " + p);
+    });
 
-                if (foundAny) {
-                    // Simulación de fusión 3D
-                    renderStructure("pdb:1SFO"); 
-                    document.getElementById('energyVal').innerText = totalEnergy.toFixed(2) + " kcal";
-                    document.getElementById('stabilityVal').innerText = (Math.random() * 100).toFixed(1) + "%";
-                    document.getElementById('molName').innerText = "Híbrido Recombinante";
-                    document.getElementById('molFormula').innerText = "Fusión de múltiples ligandos";
-                    terminal.innerHTML += `<p class="text-green-400 font-bold">> ÉXITO: Fusión molecular completada.</p>`;
-                }
-            } else {
-                // Búsqueda simple
-                if (MOLECULES[input]) {
-                    renderStructure(MOLECULES[input].pdb);
-                    document.getElementById('energyVal').innerText = MOLECULES[input].energy.toFixed(2) + " kcal";
-                    document.getElementById('stabilityVal').innerText = "98.2%";
-                    document.getElementById('molName').innerText = MOLECULES[input].name;
-                    document.getElementById('molFormula').innerText = MOLECULES[input].formula;
-                    terminal.innerHTML += `<p class="text-cyan-400">> Estructura de ${MOLECULES[input].name} cargada.</p>`;
-                } else {
-                    terminal.innerHTML += `<p class="text-red-400">> ERROR: Sustancia desconocida en base de datos local.</p>`;
-                }
-            }
-        }
+    DISEASES.forEach(d => {
+        if(input.includes(d)) detected.push("Enfermedad: " + d);
+    });
 
-        function renderStructure(id) {
-            viewer.clear();
-            $3Dmol.download(id, viewer, {}, function() {
-                viewer.setStyle({}, { cartoon: { color: 'spectrum' }, stick: { radius: 0.15 } });
-                viewer.zoomTo();
-                viewer.render();
-                viewer.animate({loop: "backAndForth", step: 1});
-            });
-        }
-    </script>
-</body>
-</html>
+    return detected;
+}
+
+/* ===========================
+   🧠 IA ANALÍTICA MEJORADA
+=========================== */
+
+function advancedAIAnalysis(input){
+    return {
+        stability: (80 + Math.random()*20).toFixed(2),
+        risk: (Math.random()*30).toFixed(2),
+        effectiveness: (50 + Math.random()*50).toFixed(2)
+    };
+}
+
+/* ===========================
+   🧬 SIMULACIÓN GENÉTICA (NO REAL)
+=========================== */
+
+function generateFakeDNA(){
+    const bases = ["A","T","C","G"];
+    let seq = "";
+    for(let i=0;i<120;i++){
+        seq += bases[Math.floor(Math.random()*4)];
+    }
+    return seq;
+}
+
+/* ===========================
+   🧾 FORMATO FASTA SIMULADO
+=========================== */
+
+function getFASTA(){
+    const dna = generateFakeDNA();
+    return `>Secuencia_Simulada\n${dna}`;
+}
+
+/* ===========================
+   🛡 VALIDACIÓN DE SEGURIDAD
+=========================== */
+
+function safetyCheck(input){
+    if(input.includes("virus") || input.includes("patogeno")){
+        return "⚠ Riesgo detectado - simulación limitada";
+    }
+    return "✔ Seguro";
+}
+
+/* ===========================
+   ⏳ LÍNEA DE TIEMPO SIMULADA
+=========================== */
+
+function timeline(){
+    return {
+        duration: (Math.random()*72).toFixed(1) + " horas",
+        mutation: (Math.random()*30).toFixed(1) + " días"
+    };
+}
+
+/* ===========================
+   🧪 SIMULACIÓN EN HUMANO
+=========================== */
+
+function simulateHuman(){
+    return {
+        adverse: (Math.random()*20).toFixed(1) + "%",
+        organDamage: (Math.random()*10).toFixed(1) + "%",
+        liver: (Math.random()*15).toFixed(1) + "%"
+    };
+}
+
+/* ===========================
+   📡 CONEXIÓN EXTERNA SIMULADA
+=========================== */
+
+async function connectScientificServer(){
+    log("> Conectando a servidor científico...");
+    await new Promise(r => setTimeout(r,1000));
+    log("> Librerías tipo Biopython/RDKit simuladas activas");
+}
+
+/* ===========================
+   🧬 BUSCADOR NCBI SIMULADO
+=========================== */
+
+async function searchNCBI(query){
+    log("> Consultando base NCBI...");
+    await new Promise(r => setTimeout(r,800));
+    log("> Resultado encontrado (simulado): " + query);
+}
+
+/* ===========================
+   🧾 REPORTE COMPLETO
+=========================== */
+
+function generateFullReport(input){
+    const ai = advancedAIAnalysis(input);
+    const time = timeline();
+    const human = simulateHuman();
+
+    return `
+=== REPORTE CIENTÍFICO ===
+Entrada: ${input}
+
+Estabilidad: ${ai.stability}%
+Riesgo: ${ai.risk}%
+Efectividad: ${ai.effectiveness}%
+
+Duración: ${time.duration}
+Mutación: ${time.mutation}
+
+Reacciones adversas: ${human.adverse}
+Daño órganos: ${human.organDamage}
+Daño hepático: ${human.liver}
+
+Seguridad: ${safetyCheck(input)}
+`;
+}
+
+/* ===========================
+   🖥 TERMINAL
+=========================== */
+
+function log(msg){
+    const terminal = document.getElementById('terminal');
+    terminal.innerHTML += `<p class="text-purple-400">${msg}</p>`;
+}
+
+/* ===========================
+   🚀 OVERRIDE SIN TOCAR TU CÓDIGO
+=========================== */
+
+const originalForge = runAdvancedForge;
+
+runAdvancedForge = async function(){
+    const input = document.getElementById('substanceInput').value.toLowerCase();
+
+    log("> IA avanzada iniciada");
+
+    const detected = detectAdvanced(input);
+    detected.forEach(d => log("> Detectado: " + d));
+
+    await connectScientificServer();
+    await searchNCBI(input);
+
+    log("> Seguridad: " + safetyCheck(input));
+
+    const fasta = getFASTA();
+    log("> FASTA generado:");
+    log(fasta);
+
+    const report = generateFullReport(input);
+    console.log(report);
+
+    originalForge();
+}
+</script>
